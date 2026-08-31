@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Schedule</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1a1a19">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Schedule">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:#fcfcfb; --plane:#f9f9f7; --text-primary:#0b0b0b; --text-secondary:#52514e;
+    --muted:#898781; --grid:#e1e0d9; --border:rgba(11,11,11,0.10);
+    --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --c4:#eda100; --c5:#e87ba4; --c6:#008300;
+    --tint:0.13;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1:#1a1a19; --plane:#0d0d0d; --text-primary:#fff; --text-secondary:#c3c2b7;
+      --muted:#898781; --grid:#2c2c2a; --border:rgba(255,255,255,0.10);
+      --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; --c6:#008300;
+      --tint:0.20;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d; --text-primary:#fff; --text-secondary:#c3c2b7;
+    --muted:#898781; --grid:#2c2c2a; --border:rgba(255,255,255,0.10);
+    --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; --c6:#008300;
+    --tint:0.20;
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; padding:26px 20px 60px; background:var(--plane); color:var(--text-primary);
+         font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  .wrap { max-width:920px; margin:0 auto; }
+  h1 { font-size:23px; font-weight:640; margin:0 0 3px; letter-spacing:-0.01em; }
+  .sub { color:var(--text-secondary); margin:0 0 20px; font-size:13.5px; }
+
+  .bar { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:14px; }
+  button { font:inherit; font-size:13px; padding:7px 13px; border-radius:8px; border:1px solid var(--border);
+           background:var(--surface-1); color:var(--text-secondary); cursor:pointer; }
+  button[aria-pressed="true"] { background:var(--text-primary); color:var(--surface-1);
+                                border-color:var(--text-primary); font-weight:560; }
+  button:hover:not([aria-pressed="true"]) { background:var(--grid); }
+  .spacer { flex:1; }
+
+  /* day picker */
+  .days { display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; padding-bottom:2px; }
+  .dchip { flex:1 0 auto; min-width:72px; text-align:center; padding:9px 6px 8px; border-radius:10px;
+           border:1px solid var(--border); background:var(--surface-1); cursor:pointer; }
+  .dchip .dn { font-size:11px; color:var(--muted); font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+  .dchip .dp { font-size:11.5px; color:var(--text-secondary); margin-top:3px; font-variant-numeric:tabular-nums; }
+  .dchip[aria-pressed="true"] { border-color:var(--text-primary); background:var(--text-primary); }
+  .dchip[aria-pressed="true"] .dn, .dchip[aria-pressed="true"] .dp { color:var(--surface-1); }
+  .dchip.full { border-color:var(--c6); }
+
+  /* progress */
+  .prog { display:flex; align-items:center; gap:12px; background:var(--surface-1); border:1px solid var(--border);
+          border-radius:12px; padding:13px 16px; margin-bottom:14px; }
+  .prog .n { font-size:22px; font-weight:650; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; }
+  .prog .l { font-size:12px; color:var(--muted); }
+  .track { flex:1; height:8px; background:var(--grid); border-radius:99px; overflow:hidden; }
+  .fill { height:100%; background:var(--c6); border-radius:99px; transition:width .25s ease; }
+
+  /* task list */
+  .list { display:flex; flex-direction:column; gap:7px; }
+  .task { background:var(--surface-1); border:1px solid var(--border); border-radius:11px;
+          border-left:3px solid var(--bc); overflow:hidden; }
+  .trow { display:flex; align-items:flex-start; gap:11px; padding:11px 13px; cursor:pointer; }
+  .time { font-size:11.5px; color:var(--text-secondary); font-variant-numeric:tabular-nums;
+          width:44px; flex:none; padding-top:1px; }
+  .tmid { flex:1; min-width:0; }
+  .tt { font-weight:570; font-size:14px; }
+  .tmeta { font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .chev { color:var(--muted); font-size:11px; flex:none; padding-top:3px; transition:transform .18s; }
+  .task.open .chev { transform:rotate(90deg); }
+
+  .cb { width:21px; height:21px; flex:none; border-radius:6px; border:1.8px solid var(--muted);
+        background:transparent; cursor:pointer; position:relative; padding:0; margin-top:1px; }
+  .cb:hover { border-color:var(--text-primary); }
+  .cb[aria-checked="true"] { background:var(--c6); border-color:var(--c6); }
+  .cb[aria-checked="true"]::after { content:''; position:absolute; left:6px; top:2px; width:5px; height:10px;
+        border:solid #fff; border-width:0 2.2px 2.2px 0; transform:rotate(45deg); }
+  .task.done .tt { text-decoration:line-through; color:var(--muted); }
+  .task.done { opacity:.62; }
+
+  .steps { display:none; padding:0 13px 10px 13px; }
+  .task.open .steps { display:block; }
+  .note { font-size:12.5px; color:var(--text-secondary); background:var(--plane);
+          border-radius:8px; padding:9px 11px; margin-bottom:9px; }
+  .step { display:flex; gap:10px; align-items:flex-start; padding:7px 0; border-top:1px solid var(--grid); }
+  .step .sx { font-size:12.5px; flex:1; }
+  .step.done .sx { text-decoration:line-through; color:var(--muted); }
+  .step .cb { width:18px; height:18px; border-radius:5px; }
+  .step .cb[aria-checked="true"]::after { left:5px; top:1.5px; width:4px; height:9px; border-width:0 2px 2px 0; }
+  .hdr { font-size:10.5px; font-weight:650; color:var(--muted); text-transform:uppercase;
+         letter-spacing:.07em; padding:12px 0 3px; border-top:1px solid var(--grid); }
+  .hdr:first-child { border-top:0; padding-top:6px; }
+
+  .sec { font-size:15px; font-weight:620; margin:28px 0 3px; }
+  .secnote { color:var(--text-secondary); font-size:12.5px; margin:0 0 12px; }
+  .card { background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px; }
+
+  /* week grid */
+  .grid { overflow-x:auto; }
+  .gt { display:grid; grid-template-columns:42px repeat(7,minmax(96px,1fr)); min-width:760px; }
+  .dh { font-size:11.5px; font-weight:600; color:var(--text-secondary); padding:0 0 7px 5px; }
+  .col { position:relative; border-left:1px solid var(--grid); }
+  .ax { position:relative; }
+  .ax .t { position:absolute; right:5px; font-size:10px; color:var(--muted);
+           transform:translateY(-50%); font-variant-numeric:tabular-nums; }
+  .hl { position:absolute; left:0; right:0; border-top:1px solid var(--grid); }
+  .blk { position:absolute; left:2px; right:2px; border-radius:5px; padding:2px 5px; overflow:hidden;
+         font-size:10.5px; line-height:1.2; border-left:3px solid var(--bc); text-align:left;
+         background:color-mix(in srgb, var(--bc) calc(var(--tint)*100%), var(--surface-1));
+         color:var(--text-primary); cursor:pointer; }
+  .blk .ti { font-weight:560; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .blk .tm { color:var(--text-secondary); font-size:9.5px; font-variant-numeric:tabular-nums; }
+  .blk.sm .tm { display:none; }
+  .blk:hover { box-shadow:0 0 0 2px var(--surface-1), 0 0 0 3px var(--bc); z-index:5; }
+
+  table { border-collapse:collapse; width:100%; font-size:12.5px; }
+  th,td { text-align:left; padding:7px 9px; border-bottom:1px solid var(--grid); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  td.tw { font-variant-numeric:tabular-nums; color:var(--text-secondary); white-space:nowrap; }
+  td.sw { color:var(--text-secondary); }
+  .dot { width:8px; height:8px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:-1px; }
+
+  .chips { display:flex; gap:7px; flex-wrap:wrap; }
+  .chip { font-size:12px; padding:6px 11px; border-radius:999px; cursor:pointer; border:1px solid var(--border);
+          border-left:3px solid var(--c5); background:var(--surface-1); }
+  .chip b { color:var(--muted); font-weight:400; }
+  .chip:hover { background:var(--grid); }
+  .legend { display:flex; gap:12px; flex-wrap:wrap; margin:0 0 12px; font-size:11.5px; color:var(--text-secondary); }
+  .legend span { display:inline-flex; align-items:center; gap:5px; }
+  .sw2 { width:9px; height:9px; border-radius:3px; display:inline-block; }
+  .now { display:flex; align-items:center; gap:10px; background:var(--surface-1); border:1px solid var(--border);
+         border-left:3px solid var(--c2); border-radius:12px; padding:12px 15px; margin-bottom:12px; }
+  .now .nl { font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; font-weight:650; }
+  .now .nt { font-size:15px; font-weight:600; margin-top:1px; }
+  .now .ns { font-size:12px; color:var(--text-secondary); margin-top:1px; font-variant-numeric:tabular-nums; }
+  .stats { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .st { flex:1 1 96px; background:var(--surface-1); border:1px solid var(--border); border-radius:10px; padding:10px 13px; }
+  .st .v { font-size:19px; font-weight:650; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; }
+  .st .k { font-size:10.5px; color:var(--muted); margin-top:2px; }
+  .free { background:var(--surface-1); border:1px solid var(--border); border-left:3px solid var(--c3);
+          border-radius:12px; padding:11px 14px; margin-bottom:12px; }
+  .free .fk { font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; font-weight:650; }
+  .free .fv { font-size:19px; font-weight:650; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; margin-top:1px; }
+  .free .fs { font-size:12px; color:var(--text-secondary); margin-top:2px; font-variant-numeric:tabular-nums; }
+  .free .fbar { display:flex; height:6px; border-radius:3px; overflow:hidden; margin-top:9px; background:var(--grid); }
+  .free .fbar i { height:100%; display:block; }
+  .free .fgaps { display:flex; gap:6px; margin-top:8px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+  .free .fgaps::-webkit-scrollbar { display:none; }
+  .free .fgap { font-size:11px; padding:4px 10px; border-radius:999px; border:1px solid var(--border);
+              background:var(--surface-1); color:var(--text-secondary); font-variant-numeric:tabular-nums;
+              white-space:nowrap; flex:0 0 auto; }
+  .free .fgap b { color:var(--text-primary); font-weight:600; }
+  .free .fgap .mo { color:var(--muted); margin-left:5px; }
+  .free .fv .fx { font-size:12.5px; font-weight:500; color:var(--text-secondary); letter-spacing:0; }
+  .free .fv .fp { font-size:12.5px; font-weight:500; color:var(--muted); letter-spacing:0; }
+  .free .fbar i + i { border-left:1px solid var(--surface-1); }
+  .mtrow { display:flex; gap:6px; margin-top:10px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+  .mtrow::-webkit-scrollbar { display:none; }
+  .mtp { flex:1 0 auto; min-width:80px; text-align:left; padding:7px 9px 6px; border-radius:9px;
+         border:1px solid var(--border); background:var(--surface-1); cursor:pointer;
+         border-left:3px solid var(--pc); }
+  .mtp .mv { display:block; font-size:14px; font-weight:650; color:var(--text-primary);
+             font-variant-numeric:tabular-nums; letter-spacing:-0.01em; }
+  .mtp .mk { display:block; font-size:10px; color:var(--muted); margin-top:1px; white-space:nowrap; }
+  .mtp.on { background:color-mix(in srgb, var(--pc) 14%, var(--surface-1)); border-color:var(--pc); }
+  .mtp.nil { opacity:.45; }
+  .mtwhat { font-size:11.5px; color:var(--text-secondary); margin-top:10px; line-height:1.45; }
+  .mtwhat b { color:var(--text-primary); font-weight:620; }
+  .mtwhy { font-size:11px; color:var(--muted); margin-top:7px; font-style:italic; line-height:1.45; }
+  .plDays { display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; padding-bottom:2px; }
+  .pld { flex:1 0 auto; min-width:72px; text-align:center; padding:8px 6px 7px; border-radius:10px;
+         border:1px solid var(--border); background:var(--surface-1); cursor:pointer; }
+  .pld .pn { display:block; font-size:11px; color:var(--muted); font-weight:650; letter-spacing:.04em; text-transform:uppercase; }
+  .pld .pc { display:block; font-size:12px; color:var(--text-primary); margin-top:2px; font-variant-numeric:tabular-nums; }
+  .pld.on { background:var(--text-primary); border-color:var(--text-primary); }
+  .pld.on .pn, .pld.on .pc { color:var(--surface-1); }
+  .plWhen { font-size:12px; color:var(--text-secondary); margin:0 0 10px; font-variant-numeric:tabular-nums; }
+  .plr { display:flex; align-items:center; gap:9px; padding:6px 0; border-top:1px solid var(--grid); }
+  .plr.off { opacity:.5; }
+  .plt { flex:0 0 26px; width:26px; height:26px; padding:0; border-radius:7px; font-size:13px; line-height:1;
+         border:1px solid var(--border); background:var(--surface-1); color:var(--text-secondary); cursor:pointer; }
+  .plt[aria-pressed="true"] { background:var(--c6); border-color:var(--c6); color:#fff; font-weight:700; }
+  .plw { flex:0 0 88px; font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .pll { flex:0 0 74px; font-size:11.5px; color:var(--text-secondary); white-space:nowrap; }
+  .f .pli, .pli { flex:1 1 auto; min-width:0; font:inherit; font-size:13px; padding:6px 9px;
+         border-radius:8px; border:1px solid var(--border); background:var(--surface-1); color:var(--text-primary); }
+  @media (max-width:392px){ .pll { display:none; } }
+  .mtbs { display:flex; gap:5px; flex-wrap:wrap; }
+  .mtb { font-size:11.5px; padding:5px 10px; border-radius:8px; border:1px solid var(--border);
+         border-left:3px solid var(--pc); background:var(--surface-1); color:var(--text-secondary); cursor:pointer; }
+  .mtb.on { background:color-mix(in srgb, var(--pc) 16%, var(--surface-1)); border-color:var(--pc);
+            color:var(--text-primary); font-weight:580; }
+  .mtmin { display:flex; align-items:center; gap:9px; margin-top:9px; font-size:11.5px; color:var(--text-secondary); }
+  .f .mtmin input { width:74px; flex:0 0 74px; }
+  .mtmin span { flex:1 1 auto; line-height:1.35; }
+  .mtmin.off { opacity:.4; }
+  .mthint { font-size:11px; color:var(--muted); margin-top:7px; line-height:1.45; }
+  .mthint b { color:var(--text-secondary); font-weight:600; }
+  .mthint .mtd { display:block; margin-top:2px; }
+  .clock { font-size:12.5px; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
+  .badge { font-size:9.5px; font-weight:700; letter-spacing:.06em; padding:2px 6px; border-radius:5px;
+           background:var(--c2); color:#fff; margin-left:7px; vertical-align:1px; }
+  .task.past { opacity:.5; }
+  .task.current { border-color:var(--c2); box-shadow:0 0 0 2px color-mix(in srgb, var(--c2) 22%, transparent); }
+  .dchip.today { box-shadow:inset 0 0 0 1.5px var(--c2); }
+  .nowline { position:absolute; left:0; right:0; height:0; border-top:2px solid var(--c2); z-index:8; }
+  .nowline::before { content:''; position:absolute; left:-3px; top:-4px; width:7px; height:7px;
+                     border-radius:50%; background:var(--c2); }
+  /* add-task form */
+  .form { background:var(--surface-1); border:1px solid var(--border); border-radius:12px;
+          padding:15px; margin-bottom:12px; }
+  .form h3 { margin:0 0 12px; font-size:14px; font-weight:640; }
+  .fg { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:10px; }
+  .f label { display:block; font-size:10.5px; color:var(--muted); font-weight:600;
+             text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+  .f input, .f select, .f textarea { width:100%; font:inherit; font-size:13px; padding:8px 10px;
+    border-radius:8px; border:1px solid var(--border); background:var(--plane); color:var(--text-primary); }
+  .f textarea { min-height:78px; resize:vertical; font-size:12.5px; }
+  .swatches { display:flex; gap:6px; flex-wrap:wrap; }
+  .sq { width:28px; height:28px; border-radius:8px; border:2px solid transparent; cursor:pointer; padding:0; }
+  .sq[aria-pressed="true"] { border-color:var(--text-primary); }
+  .chkline { display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:10px; }
+  .prio { color:var(--c4); margin-left:6px; }
+  .task.oneoff { border-style:dashed; }
+  .del { font-size:11px; color:var(--muted); background:none; border:0; cursor:pointer; padding:2px 6px; }
+  .del:hover { color:var(--c2); }
+
+  /* tracker */
+  .tsec { margin-bottom:20px; }
+  .tsec h3 { font-size:13px; font-weight:640; margin:0 0 2px; }
+  .tsec p { font-size:12px; color:var(--text-secondary); margin:0 0 11px; }
+  .rows { display:grid; grid-template-columns:auto 1fr 62px; gap:5px 10px; align-items:center; }
+  .rl { font-size:11.5px; color:var(--text-secondary); text-align:right; font-variant-numeric:tabular-nums;
+        max-width:170px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rb { height:14px; border-radius:0 4px 4px 0; min-width:2px; background:var(--bc2); }
+  .rv { font-size:11px; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
+  .empty { font-size:12.5px; color:var(--muted); padding:14px; text-align:center;
+           border:1px dashed var(--border); border-radius:10px; }
+  .callout { border-left:3px solid var(--c2); border-radius:0 9px 9px 0; padding:11px 14px; font-size:12.5px;
+             background:color-mix(in srgb, var(--c2) 8%, var(--surface-1)); margin-top:12px; }
+  .chip.add::after { content:'+'; margin-left:7px; color:var(--muted); font-weight:600; }
+  .chip.add:hover::after { color:var(--text-primary); }
+  .quickbox { background:var(--surface-1); border:1px solid var(--border); border-radius:12px;
+              padding:13px 15px; margin-bottom:12px; }
+  .qlabel { font-size:10.5px; color:var(--muted); font-weight:600; text-transform:uppercase;
+            letter-spacing:.05em; margin-bottom:9px; }
+  .qlabel span { color:var(--text-primary); }
+  .toast { position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:40;
+           background:var(--text-primary); color:var(--surface-1); font-size:13px; font-weight:520;
+           padding:10px 16px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,.22); }
+  .toast button { background:none; border:0; color:var(--surface-1); text-decoration:underline;
+                  font-size:13px; padding:0 0 0 12px; cursor:pointer; }
+  .edit { display:flex; gap:8px; align-items:center; padding:9px 0 2px; border-top:1px solid var(--grid); margin-top:4px; }
+  .edit input { font:inherit; font-size:12px; padding:5px 8px; border-radius:7px;
+                border:1px solid var(--border); background:var(--plane); color:var(--text-primary); }
+  .step a { color:var(--c1); }
+  .qbox { display:flex; align-items:center; gap:9px; flex-wrap:wrap; padding:10px 11px; margin:2px 0 9px;
+          background:var(--plane); border-radius:9px; }
+  .qbox label { font-size:11.5px; color:var(--text-secondary); }
+  .qbox input { width:74px; font:inherit; font-size:13px; padding:6px 9px; border-radius:7px;
+                border:1px solid var(--border); background:var(--surface-1); color:var(--text-primary); }
+  .qbox .of { font-size:11.5px; color:var(--muted); }
+  .score { font-size:10px; font-weight:700; padding:2px 6px; border-radius:5px; margin-left:7px;
+           vertical-align:1px; color:#fff; }
+  .daysec { font-size:10.5px; color:var(--muted); font-weight:600; text-transform:uppercase;
+            letter-spacing:.05em; margin:16px 0 7px; }
+  .daysec:first-child { margin-top:0; }
+  .ttrow { display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--grid); flex-wrap:wrap; }
+  .ttrow:first-child { border-top:0; }
+  .ttrow .d { width:44px; font-size:12.5px; font-weight:600; }
+  .ttrow input[type=time] { font:inherit; font-size:12.5px; padding:5px 8px; border-radius:7px;
+    border:1px solid var(--border); background:var(--plane); color:var(--text-primary); }
+  .ttrow .off { font-size:12px; color:var(--muted); }
+  .ttrow label { font-size:12px; color:var(--text-secondary); display:flex; align-items:center; gap:5px; }
+  .ttwarn { font-size:11.5px; color:var(--c2); width:100%; padding-left:54px; }
+  .pv { font-size:12.5px; padding:7px 0; border-top:1px solid var(--grid); display:flex; gap:10px; align-items:center; }
+  .pv .k { font-weight:600; width:88px; }
+  .pv .v { color:var(--text-secondary); }
+  .pv.bad .v { color:var(--c2); }
+  .ovrow { font-size:12.5px; padding:7px 0; border-top:1px solid var(--grid); display:flex; gap:10px; align-items:center; }
+  .ovrow .k { font-weight:600; }
+  .ovrow .v { color:var(--text-secondary); flex:1; }
+  .f select { width:100%; font:inherit; font-size:13px; padding:8px 10px; border-radius:8px;
+              border:1px solid var(--border); background:var(--plane); color:var(--text-primary); }
+  .quickday { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:12px; }
+  .acts { display:flex; gap:6px; flex-wrap:wrap; padding:10px 0 2px; border-top:1px solid var(--grid); margin-top:6px; }
+  .acts button { font-size:11.5px; padding:5px 10px; }
+  .ed { padding:4px 0 2px; }
+  .ed .fg { margin-bottom:9px; }
+  .scope { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+  .scope button { font-size:11.5px; padding:5px 11px; }
+  .edited { font-size:9.5px; font-weight:700; letter-spacing:.05em; padding:2px 5px; border-radius:4px;
+            background:var(--grid); color:var(--text-secondary); margin-left:6px; vertical-align:1px; }
+  .prow { display:flex; align-items:center; gap:8px; padding:7px 0; border-top:1px solid var(--grid); flex-wrap:wrap; }
+  .prow .pn { width:58px; font-size:12px; font-weight:600; }
+  .prow .pn.b { font-weight:400; color:var(--muted); }
+  .prow input[type=time] { font:inherit; font-size:12px; padding:4px 7px; border-radius:6px;
+    border:1px solid var(--border); background:var(--plane); color:var(--text-primary); }
+  .prow input[type=text] { flex:1; min-width:110px; font:inherit; font-size:12.5px; padding:5px 9px;
+    border-radius:7px; border:1px solid var(--border); background:var(--plane); color:var(--text-primary); }
+  .subgrid { display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center; }
+  .cancelled .tt { text-decoration:line-through; }
+  .hidden { display:none; }
+  footer { margin-top:26px; color:var(--muted); font-size:11px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>My schedule</h1>
+  <p class="sub" id="today">…</p>
+
+  <div class="bar">
+    <button id="vDay"   aria-pressed="true"  onclick="setView('day')">Day</button>
+    <button id="vWeek"  aria-pressed="false" onclick="setView('week')">Week</button>
+    <button id="vTable" aria-pressed="false" onclick="setView('table')">List</button>
+    <button id="vTrack" aria-pressed="false" onclick="setView('track')">Tracker</button>
+    <span class="spacer"></span>
+    <button onclick="toggleTT()" id="bTT">Classes</button>
+    <button onclick="toggleTheme()" id="bTheme">Dark</button>
+  </div>
+
+  <div id="ttPanel" class="form hidden">
+    <h3>This week&rsquo;s classes</h3>
+    <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 12px">
+      The bells never move. Tick the slots that actually run this week and name them.
+      Untick one in the middle and it becomes a free period; untick the last ones and school
+      finishes earlier &mdash; the gym, lunch and the whole evening move up with it.</p>
+    <div class="bar" id="plHead" style="margin-bottom:10px"></div>
+    <div class="plDays" id="plDays"></div>
+    <div class="plWhen" id="plWhen"></div>
+    <div id="plRows"></div>
+    <div class="bar" style="margin-top:14px;border-top:1px solid var(--grid);padding-top:12px">
+      <button onclick="toggleTT()">Done</button>
+      <span class="spacer"></span>
+      <button onclick="resetEdits()">Undo all my task edits</button>
+    </div>
+  </div>
+
+  <div id="dayView">
+    <div class="now" id="nowCard"></div>
+    <div class="free" id="freeBox"></div>
+    <div class="stats" id="stats"></div>
+    <div class="days" id="days"></div>
+    <div class="quickday" id="quickday"></div>
+    <div class="quickbox">
+      <div class="qlabel">Tap to add to <span id="qday">today</span></div>
+      <div class="chips" id="quick"></div>
+      <div class="bar" style="margin:10px 0 0"><button onclick="toggleForm()" id="bAdd">Something else — full form</button></div>
+    </div>
+    <div id="toast" class="toast hidden"></div>
+    <div id="form" class="form hidden">
+      <h3>New one-off task</h3>
+
+      <div class="fg">
+        <div class="f"><label>Task name</label><input id="fName" placeholder="Dentist, birthday, hand in project…"></div>
+        <div class="f"><label>Date</label><input id="fDate" type="date"></div>
+      </div>
+      <div class="fg">
+        <div class="f"><label>Start time</label><input id="fTime" type="time" value="12:00"></div>
+        <div class="f"><label>Minutes</label><input id="fDur" type="number" min="5" step="5" value="30" oninput="renderFormMt()"></div>
+        <div class="f"><label>Colour</label><div class="swatches" id="fCat"></div></div>
+      </div>
+      <div class="chkline"><input type="checkbox" id="fRep" style="width:auto"><label for="fRep" style="margin:0;text-transform:none;font-size:13px;color:var(--text-primary);font-weight:400">Repeat every week on that day</label></div>
+      <div class="chkline"><input type="checkbox" id="fPrio" style="width:auto"><label for="fPrio" style="margin:0;text-transform:none;font-size:13px;color:var(--text-primary);font-weight:400">Mark as important</label></div>
+      <div class="f" style="margin-bottom:10px"><label>Note (optional)</label><input id="fNote" placeholder="Anything you want on the card"></div>
+      <div class="f" style="margin-bottom:12px"><label>Steps — one per line</label><textarea id="fSteps" placeholder="Bring the form&#10;Ask about the referral&#10;Book the next one"></textarea></div>
+      <div id="fMtBox"></div>
+      <div class="bar"><button onclick="addTask()" style="background:var(--text-primary);color:var(--surface-1);border-color:var(--text-primary);font-weight:560">Add task</button><button onclick="toggleForm()">Cancel</button></div>
+    </div>
+    <div class="prog">
+      <div><div class="n" id="pn">0/0</div><div class="l" id="pl">tasks done</div></div>
+      <div><div class="n" id="ps">–</div><div class="l">score /10</div></div>
+      <div class="track"><div class="fill" id="pf" style="width:0%"></div></div>
+      <button onclick="resetDay()">Reset day</button>
+      <button onclick="saveProgress()">Save</button>
+      <button onclick="exportICS()">Calendar file</button>
+      <button onclick="document.getElementById('fin').click()">Load</button>
+      <input type="file" id="fin" accept="application/json" class="hidden" onchange="loadProgress(event)">
+    </div>
+    <div class="daysec">All day</div>
+    <div class="list" id="allday"></div>
+    <div class="daysec">Scheduled</div>
+    <div class="list" id="list"></div>
+  </div>
+
+  <div id="weekView" class="hidden">
+    <div class="legend" id="legend"></div>
+    <div class="card grid"><div class="gt" id="gt"></div></div>
+  </div>
+
+  <div id="tableView" class="hidden"></div>
+  <div id="trackView" class="hidden"></div>
+
+  <div class="sec">Dated one-offs</div>
+  <p class="secnote">From the memory protocol. Tap one to schedule it — the form opens filled in.</p>
+  <div class="card"><div class="chips" id="oneoff"></div></div>
+
+  <div id="detail" class="hidden"></div>
+  <footer id="foot"></footer>
+</div>
+<script>// ---------------------------------------------------------------------------
+// Times are minutes from midnight — exact integers, no float drift.
+// Every task carries its own steps. Nothing is left as a bare title.
+// ---------------------------------------------------------------------------
+const CAT = {
+  morning: {c:'var(--c1)', label:'Routine'},
+  train:   {c:'var(--c2)', label:'Training'},
+  meal:    {c:'var(--c3)', label:'Meals & home'},
+  study:   {c:'var(--c4)', label:'Study & drills'},
+  wind:    {c:'var(--c5)', label:'Wind-down'},
+  people:  {c:'var(--c6)', label:'School & people'},
+};
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+// --- Gym: the 6-day PPL split, verbatim from training_master_plan.xlsx ------
+const W_PUSH = ['5 min light cardio — incline walk/bike','Band pull-aparts 2×20','Band shoulder pass-throughs 2×10','Ramp-up sets on 1st press — light → 2 ascending sets (not logged)'];
+const W_PULL = ['5 min light cardio — row/bike','Band pull-aparts 2×20','Dead hang 2×20–30 s','Light pulldown ramp 1×12 (not logged)'];
+const W_LEGS = ['5 min bike — warm hips/knees/ankles','Leg swings 10/leg each way','Bodyweight squats 1×15 + ankle rocks','Ramp sets on 1st lift — 3–4 ascending sets, thorough (not logged)'];
+const S_PUSH = ['Doorway pec stretch — 30–45 s','Cross-body delt stretch — 30–45 s','Overhead triceps stretch — 30–45 s'];
+const S_PULL = ['Lat stretch, one-arm hang or kneeling reach — 30–45 s','Rear-delt cross-body stretch — 30–45 s','Biceps/forearm wall stretch — 30–45 s'];
+const LOG = 'Log your top working set in kg×reps — the Gym Tracker tab wants one number per week.';
+
+const GYM = {
+  G1:{n:'Push A',dur:70,focus:'Upper + mid chest · side delts · triceps',warm:W_PUSH,str:S_PUSH,work:[
+    '1. Incline Barbell Press — 4 × 6–10 · rest 2.5–3 min · bench 30°, grip just wider than shoulders · tempo 3-1-1',
+    '2. Flat Dumbbell Press — 4 × 8–12 · rest 2 min · neutral-to-pronated · tempo 3-0-1',
+    '3. Weighted Dip, chest-focus — 3 × 8–12 · rest 2 min · lean torso forward ~30°, belt for load',
+    '4. Cable Lateral Raise, 1-arm lean-away — 4 × 12–20 · rest 60–75 s · PRIORITY',
+    '5. Incline Cable Fly, low→high — 3 × 12–15 · rest 75–90 s · staggered stance',
+    '6. Overhead Cable Triceps Ext, rope — 3 × 10–15 · rest 75–90 s · elbows by ears']},
+  G2:{n:'Pull A',dur:65,focus:'Lat width · rear delts · biceps',warm:W_PULL,str:S_PULL,work:[
+    '1. Lat Pulldown, wide pronated — 4 × 8–12 · rest 2–2.5 min · thumbless grip optional',
+    '2. Chest-Supported Row, neutral — 3 × 8–12 · rest 2 min',
+    '3. Straight-Arm Cable Pulldown — 3 × 12–15 · rest 75–90 s · arms nearly straight',
+    '4. Reverse Pec Deck — 4 × 15–20 · rest 60–75 s · chest on pad',
+    '5. Incline Dumbbell Curl — 2 × 10–12 · rest 75–90 s · bench ~60°, arms hanging behind torso',
+    '6. Hammer Curl — 3 × 10–12 · rest 60–75 s · neutral grip']},
+  G3:{n:'Legs A',dur:70,focus:'Quads · calves · abs — heavy & low-rep for bone',warm:W_LEGS,
+      str:['Quad stretch — heel to glute, hips forward','Hamstring stretch — flat-back hinge','Hip-flexor stretch — half-kneel, tuck pelvis','Calf stretch — heel down, knee straight'],work:[
+    '1. Barbell Back Squat — 4 × 4–6 · rest 3 min · high-bar, full depth · 1–2 reps in reserve, never grind',
+    '2. Leg Press — 3 × 6–8 · rest 2.5 min · feet lower & shoulder-width',
+    '3. Leg Extension — 3 × 8–10 · rest 75–90 s · toes neutral',
+    '4. Seated Leg Curl — 3 × 8–10 · rest 75–90 s',
+    '5. Standing Calf Raise (gastroc) — 4 × 8–12 · rest 75–90 s · tempo 3-2-1',
+    '6. Cable Lateral Raise, finisher — 2 × 12–20 · rest 60 s',
+    '7. Cable Crunch — 3 × 12–15 · rest 60 s · kneeling']},
+  G4:{n:'Push B',dur:75,focus:'Side delts (priority) · shoulders · upper chest · triceps',warm:W_PUSH,str:S_PUSH,work:[
+    '1. Overhead Press, DB or machine — 4 × 6–10 · rest 2.5–3 min · seated, back supported',
+    '2. Machine / DB Lateral Raise — 4 × 12–20 · rest 60–75 s · PRIORITY',
+    '3. Incline Machine / Smith Press — 4 × 8–12 · rest 2 min · ~30°',
+    '4. Close-Grip Bench or Dips — 3 × 8–12 · rest 2 min · hands ~shoulder-width, elbows tucked',
+    '5. Cable Lateral Raise, 1-arm — 2 × 15–20 · rest 60 s',
+    '6. Low-to-High Cable Fly — 3 × 12–15 · rest 75 s · sweep up and in',
+    '7. Rear-Delt Cable Fly, 1-arm cross-body — 4 × 15–20 · rest 60 s']},
+  G5:{n:'Pull B',dur:75,focus:'Back thickness · traps · biceps · forearms',warm:W_PULL,str:S_PULL,work:[
+    '1. Barbell Row or T-Bar — 4 × 8–12 · rest 2.5 min · pronated, torso ~45°',
+    '2. Lat Pulldown, close neutral — 2 × 10–12 · rest 2 min · V-handle',
+    '3. Seated Cable Row, wide pronated — 4 × 10–15 · rest 75–90 s',
+    '4. Bent-over DB Reverse Fly — 3 × 15–20 · rest 60 s · hinge ~45°, chest down',
+    '5. Cable Shrug, moderate — 3 × 12–15 · rest 60–75 s · straight up and down',
+    '6. EZ-Bar Curl — 3 × 8–12 · rest 75–90 s',
+    '7. Reverse Curl — 2 × 10–15 · rest 60 s · pronated grip',
+    '8. Wrist Curl + Reverse Wrist Curl, superset — 3 each × 15–20 · rest 45–60 s']},
+  G6:{n:'Legs B',dur:80,focus:'Hams & glutes · calves · lower back · abs — heavy & low-rep',warm:W_LEGS,
+      str:['Hamstring stretch — flat-back hinge or lying raise','Figure-4 glute stretch','Child’s pose / cat-cow — decompress the low back','Calf stretch, knee bent — targets soleus'],work:[
+    '1. Romanian Deadlift — 4 × 5–8 · rest 3 min · shins near-vertical · straps if grip limits',
+    '2. Barbell Hip Thrust — 3 × 6–8 · rest 2 min · bench under scapula, pad on hips',
+    '3. Lying Leg Curl — 3 × 8–10 · rest 75–90 s',
+    '4. Leg Extension, light — 2 × 10–12 · rest 75 s',
+    '5. Seated Calf Raise (soleus) — 5 × 8–12 · rest 75–90 s · bent knee',
+    '6. Back Extension — 3 × 10–15 · rest 75–90 s · moderate rep — loads the spine, not the leg bone',
+    '7. Cable Lateral Raise, finisher — 2 × 12–20 · rest 60 s',
+    '8. Lying Leg Raise / Reverse Crunch — 3 × 12–15 · rest 60 s · floor']},
+};
+
+const FLEX = [
+  'Never cold — straight after training. Never stretch to pain.',
+  '1. Calf stretch, knee STRAIGHT — 45–60 s × 3/leg · ★ tibia · heel glued down, toes forward, knee locked',
+  '2. Calf stretch, knee BENT — 45–60 s × 2/leg · ★ tibia · sink the knee forward, heel stays down',
+  '3. Ankle knee-to-wall — 20 s × 2/leg · ★ tibia · knee over 2nd toe · measure the cm and log it',
+  '4. Deep squat hold — 60–120 s × 2–3 · heels down, tall chest, elbows push knees out',
+  '5. Forward fold — 45–60 s × 3 · ★ femur · lead with the chest, hinge from the hips',
+  '6. Single-leg hamstring — 45 s × 2/leg · ★ femur · heel on a low bench, flat back, toes up',
+  '7. Couch / kneeling hip-flexor — 45–60 s × 2/side · ★ femur · squeeze the rear glute, don’t arch',
+  '8. Frog / adductor rock-back — 45–60 s × 3 · neutral spine, rock back to mild tension',
+  'PNF 2–3×/wk on hams, calves, hip flexors, adductors: mild tension → contract 20–30% for 6–10 s → relax → ease deeper 20–30 s → repeat 2–4×',
+];
+const CARDIO = [
+  'Zone 2 — you can hold a conversation the whole time. If you’re gasping, slow down.',
+  'Bike, incline walk or swim. Low-impact, spares the joints.',
+  '30 min continuous, heart rate roughly 60–70% of max.',
+  'Both your documents asked for this independently: BDNF and hippocampal volume (memory protocol), and a cardio base before months of being sedentary (surgery prep).',
+];
+const STUDY_AM = [
+  'Look 10 min at a walk \u2014 no phone, no nothing \u2014 then start, so it doesn\u2019t feel that boring',
+  'Today’s subject, from the rotation. Write the rotation once so you’re never deciding at 08:00.',
+  'Phone in another room. Divided attention at encoding costs about half your later recall.',
+  'Write 3 implementation intentions first: "When [cue], I will [action]."',
+  '25 min focused block',
+  '5 min break — get up, look out a window',
+  '25 min focused block',
+  'Close by recalling out loud what you covered, without looking.',
+];
+const STUDY_PM = [
+  'Retrieval pass on this morning’s subject. Testing, not re-reading.',
+  'Close the book. Write down everything you remember.',
+  'Open it. Mark what you missed — those are tomorrow’s first 5 minutes.',
+  'The testing effect is one of the strongest findings in the protocol. This pass beats a second hour of reading.',
+];
+const AIM = [
+  '15 min, every day — whether you play afterwards or not.',
+  'Pick 2–3 scenarios and keep them all week. Switching daily gives you no signal.',
+  'Order: static clicking → dynamic tracking → flicking.',
+  'Log the scores. Compare week to week, never day to day.',
+  'Stop at 15 min even if you’re on a good run.',
+];
+const MEM_BASE = [
+  'Chess tactics, slow — 10 min. Solve completely in your head before you touch a piece. Speed puzzles train guessing.',
+  'Memory palace — 10 min. Weeks 1–3: walk your Ascent route 5× with no content until the order is automatic.',
+  'From week 2: place 10 cards, one image per locus. Absurd, violent, moving — bland images don’t stick.',
+  'Recall forward, then backward. Backward is the real test.',
+];
+const MEM_MW = [...MEM_BASE,'Position reconstruction — view a real middlegame position 10 s, rebuild it on an empty board. Untrained ≈ 4–6 pieces, masters ≈ 16+.'];
+const MEM_TF = [...MEM_BASE,'Sound-to-position drill — in DM, before you turn a corner predict where the sound came from, then check. Prediction first, always.'];
+const VOD = [
+  'The highest-value drill in the protocol. Once a week.',
+  'Take a VOD — yours or a pro’s.',
+  'Every 10–15 s, pause and say out loud: where is every opponent, what do they have, what happens next.',
+  'Unpause and check. Being wrong is the mechanism, not a side effect.',
+  'Poker week: also write your 3 biggest hands from memory before opening the tracker.',
+];
+
+// --- Everyday tasks — subtasks taken from the user's own Structured entries -
+const WAKE   = ['Feet on the floor before you touch the phone','Phone stays face down until you\u2019re outside'];
+const OUTSIDE= ['Bag','Feed dog and bunny','Before school check','Walk the dog','Daylight in your eyes within 20 min of waking \u2014 this is what sets the clock that gets you asleep at 22:30'];
+// --- Skincare -------------------------------------------------------------
+// Derma roller runs SATURDAY night. It blocks actives for 48 h, so:
+//   Sat night  = roll, no actives, GHK-Cu instead
+//   Sun AM/PM  = no actives, GHK-Cu
+//   Mon AM     = no actives (48 h is up at ~21:15 Mon)
+//   Mon night onward = back to normal
+const DERMA_DAY = 6;                       // Saturday
+const recoverAM = i => i === 0 || i === 1; // Sun & Mon mornings
+const recoverPM = i => i === 0;            // Sun night
+
+const faceAM = (i) => recoverAM(i)
+  ? ['1. Light face cleanser',
+     '2. GHK-Cu spray \u2014 in place of the vitamin C while skin is recovering',
+     '3. Niacinamide',
+     '4. Eye cream',
+     '5. Moisturizer',
+     '6. Sunscreen \u2014 non-negotiable this week, freshly rolled skin burns easily',
+     'No vitamin C today \u2014 still inside the 48 h window from Saturday\u2019s roll']
+  : ['1. Light face cleanser',
+     '2. Vitamin C',
+     '3. Niacinamide',
+     '4. Eye cream',
+     '5. Moisturizer',
+     '6. Sunscreen'];
+
+const facePM = (i) => i === DERMA_DAY
+  ? ['1. Light cleanser',
+     '2. Oil-based cleanser',
+     '\u2014 DERMA ROLLER \u2014',
+     'Roll on clean, dry skin. Disinfect the roller before and after.',
+     'Nothing active goes on for 48 h from now \u2014 no acids, no retinol, no vitamin C',
+     '3. GHK-Cu spray \u2014 this is what it\u2019s for. Copper peptides go on straight after rolling.',
+     '4. Heavy moisturizer',
+     '5. Oil',
+     'Frequency depends on needle length \u2014 weekly suits short needles, longer ones want 2\u20134 weeks. Adjust if yours is long.']
+  : recoverPM(i)
+  ? ['1. Light cleanser',
+     '2. Oil-based cleanser',
+     '3. GHK-Cu spray',
+     '4. Eye cream',
+     '5. Heavy moisturizer',
+     '6. Oil',
+     'No salicylic acid, no retinol \u2014 still inside the 48 h window from last night\u2019s roll']
+  : ['1. Light cleanser',
+     '2. Oil-based cleanser',
+     '3. Salicylic acid',
+     '4. Retinol',
+     '5. Retinol eye cream',
+     '6. Heavy moisturizer',
+     '7. Oil']
+     .concat(i === 1 ? ['48 h from Saturday\u2019s roll is up as of about now \u2014 if you rolled late, hold the actives one more night'] : []);
+
+const showerAM = (i) => ['Soap everywhere but face and hair','Shave','\u2014 FACE \u2014', ...faceAM(i)];
+
+const CLOTHES= ['The clothes you laid out last night','Deodorant','Cologne'];
+const HAIR   = ['Dry','Product','Style'];
+const BFAST  = ['Feed dog and bunny, fresh water','Eat \u2014 protein first','Supplements with the food (the iHerb order) \u2014 they absorb better with a meal, and this is the one moment every day you\u2019re guaranteed to be eating','Vitamin D and calcium especially \u2014 your surgery prep sheet flags both for bone healing','Log it in Cronometer \u2014 https://cronometer.com/#diary'];
+const TEETH  = ['Brush 2 min','Floss','Tongue'];
+const BAGGO  = ['Before school check \u2014 bag was packed last night','Keys, bottle, headphones','2 minute walk'];
+const SCHOOL = ['Neck thingy','Learn good','Don\u2019t get bad shit for mashov, be good to the teacher','Write homework down the moment it\u2019s set, not at the end of the day','Anything that needs doing goes straight to the capture inbox'];
+const GOGYM  = ['Bag: shoes, belt, straps, bottle, headphones','Pull today\u2019s session up on your phone before you leave, so you\u2019re not deciding at the rack'];
+const GOHOME = ['Same trip back','Eat within a couple of hours of finishing \u2014 that\u2019s what lunch is for'];
+const LUNCH  = ['Protein first','Carbs \u2014 you trained today','Vegetables','Water','Log it in Cronometer \u2014 https://cronometer.com/#diary'];
+const DINNER = ['Protein first','Vegetables','No caffeine with it \u2014 the cutoff is 8\u201310 h before 22:30, so nothing after about 14:00','Log it in Cronometer \u2014 https://cronometer.com/#diary'];
+const DUO    = ['Keep the streak','Do the lesson out loud \u2014 the production effect encodes harder than tapping silently','One review of yesterday\u2019s before you start anything new'];
+const KIDUSH = ['Family time. This one isn\u2019t optimised \u2014 it\u2019s the point.','Phone away'];
+const LAUNDRY= ['Sort \u2014 gym kit separate','Load, detergent','Set a reminder to hang or move it to the dryer','Twice a week, three days apart. Gym kit needs it that often or it stops being wearable.'];
+const WATER  = ['Glass 1','Glass 2','Glass 3','Glass 4','Glass 5','Glass 6'];
+
+// Night shower shampoo rotation, day 1\u20137 \u2192 Sun\u2013Sat
+const SHAMPOO = ['nothing','clarifying shampoo','shampoo','nothing','shampoo','nothing','hair mask'];
+const nightPrep = (i) => [
+  'Pill / melatonin FIRST \u2014 everything else waits',
+  'Shot',
+  'Brush teeth',
+  'Do the backpack for tomorrow',
+  '\u2014 SHOWER \u2014',
+  `Hair today (day ${i+1} of 7): ${SHAMPOO[i]}`,
+  'Soap everywhere but face and hair',
+  '\u2014 FACE \u2014',
+  ...facePM(i),
+  '\u2014 THEN \u2014',
+  'Lips',
+  'Eye patch',
+  'Neck curls',
+  'Evening day-recall, 5 min \u2014 reconstruct the day in 30-min blocks, out loud, wake to now',
+  'Tick off today\u2019s 3 implementation intentions, then write tomorrow\u2019s',
+  'Lay out tomorrow\u2019s clothes',
+  'Screens off from here, brightness down',
+];
+const SLEEPPREP = [
+  'Make bed',
+  'Read a real book, 15 min \u2014 paper if you have it, not the phone',
+  'No phone in the room',
+  'PC on sleep mode',
+  'Water by the bed',
+  'Asleep by 22:30. The protocol says this one outweighs everything else in it combined.',
+];
+const RESTOCK = ['Anything that ran out today','Anything running low','Add it to the list for Thursday’s shop'];
+const EVENTS  = ['Anything coming up you haven’t sorted?','Birthdays, tests, trips, appointments','Put it in as a one-off task now, not later'];
+const EVENING_ADMIN = t => [
+  {t, d:10, n:'Restock', c:'meal', sub:RESTOCK},
+  {t:t+15, d:5, n:'Events to plan', c:'meal', sub:EVENTS},
+];
+const ERRANDS = (start) => [
+  {t:start, d:90, n:'Groceries + iHerb', c:'meal',
+   note:'Was Monday. Moved here because Thursday is your rest day — no gym to work around.', sub:SHOP},
+  {t:start+105, d:60, n:'Meal prep', c:'meal',
+   note:'Your old "Make food" and "Make food preps", in one block.', sub:MEALPREP},
+  {t:start+180, d:45, n:'Weekly review', c:'meal',
+   note:'Your "For the week" block, with your own list.', sub:WEEKREVIEW},
+];
+const CLEAN = ['Desk','Floor','Laundry out','Bin','Change the sheets','Bathroom shelf — bin what’s empty'];
+const MEALPREP = ['Cook the week\u2019s protein in bulk','Portion into containers','Prep vegetables and carbs','Label, fridge and freeze','Protein, calcium and vitamin D matter here \u2014 your surgery prep sheet flags all three for bone healing'];
+const SHOP = ['Osher Ad \u2014 work from the list you made in the weekly review','Protein, calcium, vitamin D','Check what\u2019s running low before you order','iHerb order'];
+const WEEKREVIEW = ['Restock — the full list for the shop','Make tasks','Events to plan — anything coming up?',
+  'Haircut','Doctor','School shit','Friend shit','Dog and bunny','Clean room'];
+const SCHEDREVIEW = ['Anything that didn\u2019t happen twice this week \u2014 change the time or delete it. Don\u2019t re-create it.','Anything you did that isn\u2019t on here \u2014 add it.','15 min. This is the block that stops 159 duplicates happening again.'];
+
+const MORNING_STEPS = (i) => [
+  {t:390,d:1, n:'Wake up',c:'morning',sub:WAKE},
+  {t:391,d:19,n:'Outside — walk the dog',c:'morning',q:{label:'min outside',target:19},sub:OUTSIDE},
+  {t:410,d:15,n:'Shower + face',c:'morning',sub:showerAM(i)},
+  {t:425,d:5, n:'Clothes + deodorant',c:'morning',sub:CLOTHES},
+  {t:430,d:10,n:'Hair',c:'morning',sub:HAIR},
+  {t:440,d:10,n:'Breakfast + supplements',c:'meal',sub:BFAST},
+  {t:450,d:5, n:'Brush teeth',c:'morning',sub:TEETH},
+];
+const SAT_STEPS = [
+  {t:480,d:1, n:'Wake up',c:'morning',sub:WAKE},
+  {t:481,d:14,n:'Outside — walk the dog',c:'morning',sub:OUTSIDE},
+  {t:495,d:10,n:'Shower + face',c:'morning',sub:showerAM(6)},
+  {t:505,d:5, n:'Breakfast + supplements',c:'meal',sub:BFAST},
+];
+
+// ---- Multitask model ------------------------------------------------------
+// Two questions, in a grid. What's free — your body or your head? And do you
+// get it in one stretch or in pieces? Plus Open, which is the odd one out:
+// nothing is running at all.
+const MTK = {
+  open  : {label:'Open',        short:'Open',         c:'--c3', burst:false,
+           what:'Nothing scheduled at all. The odd one out — it isn’t stacked on anything.',
+           fits:'The only kind that takes a real project, or a long stretch of study.'},
+  body  : {label:'Body free',   short:'Body free',    c:'--c2', burst:false,
+           what:'You’re sitting still and the task doesn’t need your focus.',
+           fits:'Put movement under it — mobility, stretching, calf raises, do it walking.'},
+  brain : {label:'Brain free',  short:'Brain free',   c:'--c1', burst:false,
+           what:'Your body is busy, your head isn’t.',
+           fits:'Read a book, an audiobook, a recorded lesson. This is your stretching-and-walking time.'},
+  bodyb : {label:'Body free · in bursts',  short:'Body · bursts',  c:'--c4', burst:true,
+           what:'Body free, but chopped up. No long task will survive it.',
+           fits:'Stand up, pace, calf raises, a set of something. Movement snacks, not a workout.'},
+  brainb: {label:'Brain free · in bursts', short:'Brain · bursts', c:'--c5', burst:true,
+           what:'Head free, but chopped up. No long task will survive it.',
+           fits:'Flashcards, one Anki deck, a Duolingo lesson. Nothing with a run-up — you lose it every set.'},
+};
+const MT_ORDER_ALL = ['open','body','brain','bodyb','brainb'];
+// Old saved names, from before the grid.
+const MT_MIGRATE = { ears:'brain', eyes:'brain', micro:'brainb' };
+// How much of a gym block is genuinely sit-down rest. Prescribed rest comes
+// straight out of your own program; 55% of it is what you actually get once
+// you account for racking plates, walking to the next machine and waiting.
+const REST_USABLE = 0.55;
+function gymRest(key){
+  const g = GYM[key]; if (!g) return null;
+  let sets = 0, rest = 0; const ch = [];
+  for (const l of g.work){
+    const ms = l.match(/(\d+)\s*(?:each\s*)?×/), rs = l.match(/rest\s*([\d.]+)(?:–([\d.]+))?\s*(min|s)/i);
+    if (!ms || !rs) continue;
+    const n = +ms[1], a = parseFloat(rs[1]), b = rs[2] ? parseFloat(rs[2]) : a;
+    const sec = (a + b) / 2 * (rs[3].toLowerCase() === 'min' ? 60 : 1);
+    sets += n; rest += n * sec; ch.push(sec);
+  }
+  if (!sets) return null;
+  ch.sort((x, y) => x - y);
+  return { sets, prescribed: rest / 60, m: Math.round(rest / 60 * REST_USABLE), chunk: ch[Math.floor(ch.length / 2)] / 60 };
+}
+// [pattern, kind, fraction of the block, typical piece in min]
+const MT_RULES = [
+  // deliberately nothing — these break if you split your attention
+  [/^Kidush/,                          null, 0],
+  [/^Get ready to sleep/,              null, 0],
+  [/^Study/,                           null, 0],
+  [/^Memory training/,                 null, 0],
+  [/^Aim training/,                    null, 0],
+  [/^Weekly review|^Schedule review/,  null, 0],
+  // body busy, head free — one continuous stretch
+  [/^Flexibility/,                     'brain', 1.00],
+  [/^Zone 2 cardio/,                   'brain', 1.00],
+  [/^Go to gym|^Go home|^Bag \+ walk/, 'brain', 0.85],
+  [/^Clean$|^Wash clothes|^Meal prep/, 'brain', 0.90],
+  [/^Groceries/,                       'brain', 0.78],
+  [/^Morning routine|^Morning \(late\)|^Night prep/, 'brain', 0.70],
+  [/^Lunch$|^Dinner$|^Breakfast/,      'brain', 0.80],
+  // sitting still, no focus needed — put movement under it
+  [/^Duolingo/,                        'body', 1.00],
+  [/^Pause-and-predict VOD/,           'body', 0.85],
+  // sitting, no focus, but too short and choppy for anything long
+  [/^Restock|^Events to plan/,         'bodyb', 0.80, 4],
+];
+const MT_WHY = {
+  'Flexibility'   : 'Your own example. You’re holding positions on the floor — a book props open fine.',
+  'Zone 2 cardio' : 'The whole point of zone 2 is that you can hold a conversation. On the bike you can read, not just listen.',
+  'Morning routine':'Shower, dressing, breakfast, teeth. The skincare order wants your eyes for about a third of it.',
+  'Night prep'    : 'Same shape as the morning. Keep it calm — nothing stimulating this close to sleep.',
+  'Groceries + iHerb':'Aisles yes. Choosing and checkout, no.',
+  'Duolingo'      : 'Do it walking. The lesson wants your voice, not your legs.',
+  'Pause-and-predict VOD':'You’re watching, not moving. Put the mobility work under it.',
+  'Restock'       : 'Five minutes with a list. Pace it, or do calf raises — you won’t get through anything longer.',
+  'Get ready to sleep':'Left deliberately empty. This block only works if nothing is stacked on it.',
+  'Kidush'        : 'Left deliberately empty. Phone away — that’s the point.',
+  'Study'         : 'Left empty on purpose. Splitting attention here costs more than the minutes are worth.',
+};
+function mtFor(b){
+  if (!b || b.allday || !(b.d > 0) || b.brk || b.period) return null;
+  const n = b.n || '';
+  const gk = n.match(/^(G\d) · /);
+  if (gk){ const r = gymRest(gk[1]);
+    if (r) return {k:'brainb', m:r.m, chunk:r.chunk, sets:r.sets, prescribed:r.prescribed}; }
+  for (const [re, k, f, piece] of MT_RULES)
+    if (re.test(n)) return k ? {k, m:Math.round(b.d * f), chunk:piece} : null;
+  return null;
+}
+
+const ALLDAY = [
+  {n:'Encoding habits',sub:[
+    'The 3-second rule — when you set something down, hear something you’ll need, or meet someone: stop, three seconds of undivided attention, say it out loud. "Keys, kitchen counter, left of the bowl."',
+    'One capture inbox. Everything goes there, immediately.',
+    'Never encode while multitasking. If it matters, the phone goes down for the three seconds.',
+    'Elaborate — connect what you learn to something you already know.']},
+  {n:'3 implementation intentions',sub:[
+    'Written each morning, checked off each night in Night prep.',
+    'Strict format: "When [specific cue], I will [specific action]."',
+    'Bad: "remember to email coach." Good: "When I sit down at my desk after breakfast, I will email coach."',
+    'This is the number that moves fastest — expect a jump within 10 days.']},
+  {n:'Eyes, spine & breathing',sub:[
+    'Breathe from the stomach, not the chest',
+    'Chin tucks and spine form',
+    'Eyes — stop squinting',
+    '20-20-20 rule: every 20 min, look 20 ft away for 20 seconds']},
+  {n:'Screens & sleep',sub:[
+    'No blue light at night, brightness down',
+    'Caffeine cutoff 8–10 h before bed — nothing after about 14:00',
+    'Sleep 7–9 h']},
+  {n:'15,000 steps',q:{label:'steps',target:15000},sub:[
+    'Log the number off your phone at night.',
+    'The morning walk with the dog is roughly 2,000 of it.',
+    'Walking to and from the gym adds a couple of thousand more.',
+    '15,000 is about two hours of walking spread across the day — it won’t happen by accident on a school day.',
+    'On a gym day the Zone 2 block counts toward it.']},
+  {n:'Drink water',q:{label:'glasses',target:6},sub:WATER},
+  {n:'Don’t bite nails',sub:['Hands away from your mouth','If you catch yourself, stop and put the hand flat on the desk']},
+  {n:'Minimap cadence (gaming days)',sub:[
+    'Eyes to the minimap: after every kill · every reload · before every peek · crossing an open angle · hearing anything · walking without holding.',
+    'Post-round dump before buy: enemy econ → alive count → ults → last known positions → util spent.',
+    'Two weeks of running it consciously and it goes automatic.']},
+];
+const ONEOFF = [
+  {n:'Baseline testing session',when:'This week',date:'2026-08-22',time:'10:00',d:45,c:'study',sub:[
+    'Test 1 — Backward digit span. Read a random digit string, recall it backwards. Start at 4, add one until you fail twice at a length.',
+    'Test 2 — Card memorisation. Shuffle, take 10 cards, time yourself. Then 20. Then the full deck when ready.',
+    'Test 3 — Chess position reconstruction. Real middlegame position, 10 s view, rebuild on an empty board.',
+    'Test 4 — Prospective memory. 3 intentions each morning, mark done/not done each night, % over 7 days.',
+    'Test 5 — Day reconstruction. At night, recall the day in 30-min blocks from wake to now.',
+    'Write every number down. Without them you can’t tell if any of this is working.']},
+  {n:'Week 4 retest',when:'16 September',date:'2026-09-16',time:'19:00',d:45,c:'study',sub:['Repeat all five tests','Expect palace metrics to move fast, digit span barely at all, and prospective memory % already up']},
+  {n:'Week 8 retest',when:'14 October',date:'2026-10-14',time:'19:00',d:45,c:'study',sub:['Repeat all five tests']},
+  {n:'Week 12 retest',when:'11 November',date:'2026-11-11',time:'19:00',d:45,c:'study',sub:['Repeat all five tests','End of the 12-week protocol — decide what carries on']},
+];
+
+// --- Day assembly -----------------------------------------------------------
+const MORNING = (i) => [{t:390,d:65,n:'Morning routine',c:'morning',steps:MORNING_STEPS(i)}];
+const SAT_MORNING = [{t:480,d:30,n:'Morning (late)',c:'morning',steps:SAT_STEPS}];
+const CARDIO_DAYS = [0,3,5];       // Sun, Wed, Fri — non-leg days with a gym trip
+const LAUNDRY_DAYS = [3,6];        // Wed & Sat — three days apart
+
+function run(t, list){ const o=[]; for(const b of list){ o.push({...b,t}); t+=b.d; } return {blocks:o,end:t}; }
+const B = (d,n,c,extra={}) => ({d,n,c,...extra});
+
+function gymRun(goT, key, cardio){
+  const g = GYM[key];
+  const list = [
+    B(20,'Go to gym','train',{sub:GOGYM}),
+    B(g.dur, `${key} · ${g.n}`, 'train', {note:g.focus,
+      sub:['— WARM-UP —',...g.warm,'— WORKOUT, top to bottom —',...g.work,'— STRETCHES —',...g.str,'— AFTER —',LOG]}),
+    B(20,'Flexibility','train',{note:'Surgery prep — the priority. Straight after training, never cold.',sub:FLEX}),
+  ];
+  if (cardio) list.push(B(30,'Zone 2 cardio','train',{q:{label:'min',target:30},note:'3×/week on non-leg days.',sub:CARDIO}));
+  list.push(B(20,'Go home','train',{sub:GOHOME}));
+  return run(goT, list);
+}
+const night = (i) => [
+  ...(LAUNDRY_DAYS.includes(i) ? [{t:1230,d:20,n:'Wash clothes',c:'meal',sub:LAUNDRY}] : []),
+  {t:1275,d:45,n:'Night prep',c:'wind',
+   note:'Every day. Pill first, then the shower and skincare — this is where the evening shower lives, straight from your Structured routine.',
+   sub:nightPrep(i)},
+  {t:1320,d:30,n:'Get ready to sleep',c:'wind',q:{label:'hours you slept',target:8},
+   note:'Make the bed, read 15 min, phone out of the room. Log last night’s sleep here.',sub:SLEEPPREP},
+];
+// Same two blocks, but they give way when a long school day pushes the evening
+// late. Night prep never starts before 21:15; on a late day it slides.
+const nightAfter = (i, from) => {
+  const t = Math.max(1275, from + 10);
+  const late = t > 1275;
+  return [
+    {t, d:45, n:'Night prep', c:'wind',
+     note:(late ? `School ran long today, so this is ${t-1275} min later than usual. If that keeps happening, the second study pass is the thing to cut. ` : '')
+        + 'Pill first, then the shower and skincare — this is where the evening shower lives, straight from your Structured routine.',
+     sub:nightPrep(i)},
+    {t:t+45, d:30, n:'Get ready to sleep', c:'wind', q:{label:'hours you slept',target:8},
+     note:'Make the bed, read 15 min, phone out of the room. Log last night’s sleep here.', sub:SLEEPPREP},
+  ];
+};
+
+// ---- The week -------------------------------------------------------------
+// A weekday with no classes at all falls back to this shape.
+function freeDay(i, key, memSub){
+  const gym = key ? gymRun(820, key, CARDIO_DAYS.includes(i)) : {blocks:[], end:750};
+  const a = run(key ? gym.end+5 : 780, [B(30,'Lunch','meal',{sub:LUNCH})]);
+  const errands = key ? [] : ERRANDS(840);
+  return [...MORNING(i),
+    {t:480,d:60,n:'Study',c:'study',q:{label:'min focused',target:60},note:'One hour. Rotation across the subjects you’re behind on.',sub:STUDY_AM},
+    {t:545,d:25,n:'Memory training',c:'study',note:'Memory & Awareness Protocol — Phase 1.',sub:memSub},
+    {t:575,d:15,n:'Duolingo',c:'study',q:{label:'min',target:15},sub:DUO},
+    {t:595,d:15,n:'Aim training',c:'study',q:{label:'min',target:15},sub:AIM},
+    ...gym.blocks, ...a.blocks, ...errands, ...EVENING_ADMIN(1170),
+    {t:1200,d:20,n:'Dinner',c:'meal',sub:DINNER}, ...night(i)];
+}
+const FRIDAY = (() => {
+  const gym = gymRun(630,'G5',CARDIO_DAYS.includes(5));
+  const a = run(gym.end+10,[B(30,'Lunch','meal',{sub:LUNCH})]);
+  return [...MORNING(5),
+    {t:480,d:60,n:'Study',c:'study',q:{label:'min focused',target:60},note:'One hour. Rotation across the subjects you’re behind on.',sub:STUDY_AM},
+    {t:545,d:25,n:'Memory training',c:'study',sub:MEM_TF},
+    {t:575,d:15,n:'Duolingo',c:'study',q:{label:'min',target:15},sub:DUO},
+    {t:595,d:15,n:'Aim training',c:'study',q:{label:'min',target:15},sub:AIM},
+    ...gym.blocks, ...a.blocks,
+    ...EVENING_ADMIN(1000),
+    {t:1080,d:185,n:'Kidush',c:'people',sub:KIDUSH}, ...night(5)];
+})();
+const SATURDAY = [...SAT_MORNING,
+  {t:570,d:30,n:'Pause-and-predict VOD',c:'study',note:'Weekly. The highest-value drill in the protocol.',sub:VOD},
+  {t:605,d:25,n:'Memory training',c:'study',sub:MEM_BASE},
+  {t:640,d:60,n:'Study',c:'study',q:{label:'min focused',target:60},sub:STUDY_AM},
+  {t:705,d:15,n:'Duolingo',c:'study',q:{label:'min',target:15},sub:DUO},
+  {t:725,d:15,n:'Aim training',c:'study',q:{label:'min',target:15},sub:AIM},
+  {t:780,d:30,n:'Lunch',c:'meal',sub:LUNCH},
+  ...gymRun(840,'G6',false).blocks,
+  {t:990,d:60,n:'Clean',c:'meal',note:'Your Saturday 15:00 clean, from the old schedule.',sub:CLEAN},
+  {t:1065,d:15,n:'Schedule review',c:'wind',note:'The block that stops 159 duplicates happening again.',sub:SCHEDREVIEW},
+  ...EVENING_ADMIN(1170),
+  {t:1200,d:20,n:'Dinner',c:'meal',sub:DINNER}, ...night(6)];
+
+// ---- SCHOOL — fixed bells, a fresh set of classes every week ---------------
+// Your real bell schedule. These never move; which slots run does.
+const BELLS = [
+  {p:'M', t:465, d:40, lab:'Morning class'},   // 07:45–08:25
+  {p:1,   t:510, d:45, lab:'Class 1'},         // 08:30–09:15
+  {p:2,   t:555, d:45, lab:'Class 2'},         // 09:15–10:00
+  {p:3,   t:615, d:45, lab:'Class 3'},         // 10:15–11:00
+  {p:4,   t:660, d:45, lab:'Class 4'},         // 11:00–11:45
+  {p:5,   t:730, d:45, lab:'Class 5'},         // 12:10–12:55
+  {p:6,   t:775, d:45, lab:'Class 6'},         // 12:55–13:40
+  {p:7,   t:830, d:45, lab:'Class 7'},         // 13:50–14:35
+  {p:8,   t:875, d:45, lab:'Class 8'},         // 14:35–15:20
+];
+const SLOTS = BELLS.map(b => b.p);
+// pl[slot] = subject string (may be '') if the class runs, null/undefined if it doesn't.
+function periodsFor(pl){
+  if (!pl) return [];
+  const live = BELLS.filter(b => pl[b.p] !== null && pl[b.p] !== undefined);
+  const out = [];
+  live.forEach((b, i) => {
+    if (i){ const prev = live[i-1], end = prev.t + prev.d;
+      if (b.t > end){ const g = b.t - end;
+        out.push({t:end, d:g, brk:true, free:g >= 40,
+          label: g >= 40 ? 'Free period' : g >= 20 ? 'Long break' : 'Break'}); } }
+    out.push({t:b.t, d:b.d, p:b.p, label: pl[b.p] ? `${b.lab} · ${pl[b.p]}` : b.lab});
+  });
+  return out;
+}
+const BRKSUB   = ['Get off the chair','Water','Look 20 ft away for 20 s — the eye rule'];
+const FREESUB  = ['A real gap. Anki, homework, or the study you’d otherwise do tonight.','Don’t spend it on your phone — you’ll want the evening back.'];
+const CLASSSUB = ['Write down any homework the moment it’s set','3-second rule on any date announced',
+                  'Neck thingy','Don’t get bad shit for mashov, be good to the teacher'];
+const HOMECHG  = ['Drop the bag','Gym kit on','Eat something small — you’re training before lunch',
+                  'Pull today’s session up on your phone before you leave'];
+
+function schoolDay(i, key, memSub, per){
+  const blocks = [...MORNING(i)];
+  const S = per[0].t, E = per[per.length-1].t + per[per.length-1].d;
+  const leave = S - 5, gap = leave - 455;
+  if (gap >= 20){
+    const d = Math.min(gap, 60);
+    blocks.push({t:455, d, n:'Study', c:'study', q:{label:'min focused',target:d},
+      note:`No morning class today — ${d} min in your strongest window, before you leave.`, sub:STUDY_AM});
+  }
+  blocks.push({t:leave, d:5, n:'Bag + walk to school', c:'people', sub:BAGGO});
+  per.forEach(p => blocks.push(p.brk
+    ? {t:p.t, d:p.d, n:p.label, c:'people', brk:true, free:p.free, sub:(p.free?FREESUB:BRKSUB)}
+    : {t:p.t, d:p.d, n:p.label, c:'people', period:p.p, sub:CLASSSUB}));
+
+  // Gym before lunch — everything after school keys off when the last class ends.
+  let t = E;
+  const long = E > 820;                       // finishing after 13:40
+  const doCardio = key && CARDIO_DAYS.includes(i) && !long;
+  if (key){
+    blocks.push({t, d:15, n:'Home + change', c:'people', sub:HOMECHG});
+    t += 15;
+    const gym = gymRun(t, key, doCardio);
+    blocks.push(...gym.blocks);
+    t = gym.end + 5;
+  } else {
+    blocks.push({t, d:10, n:'Home + change', c:'people', sub:['Drop the bag','Change','Kettle on']});
+    t += 15;
+  }
+  const a = run(t, [B(30,'Lunch','meal',{sub:LUNCH})]);
+  blocks.push(...a.blocks);
+  t = a.end + 10;
+  if (!key){ const er = ERRANDS(t); blocks.push(...er); t = er[er.length-1].t + er[er.length-1].d + 10; }
+
+  const eve = [
+    B(15,'Aim training','study',{q:{label:'min',target:15},sub:AIM}),
+    B(25,'Study — retrieval','study',{q:{label:'min',target:25},note:'Second pass on this morning’s subject.',sub:STUDY_PM}),
+    B(25,'Memory training','study',{sub:memSub}),
+    B(15,'Duolingo','study',{q:{label:'min',target:15},sub:DUO}),
+  ];
+  if (key && CARDIO_DAYS.includes(i) && long)
+    eve.push(B(30,'Zone 2 cardio','train',{q:{label:'min',target:30},
+      note:'Moved to the evening — school ran to '+fmtM(E)+', so it wouldn’t fit before lunch.',sub:CARDIO}));
+  eve.push(B(10,'Restock','meal',{sub:RESTOCK}), B(5,'Events to plan','meal',{sub:EVENTS}),
+           B(20,'Dinner','meal',{sub:DINNER}));
+  if (LAUNDRY_DAYS.includes(i)) eve.push(B(20,'Wash clothes','meal',{sub:LAUNDRY}));
+  const ev = run(t, eve);
+  blocks.push(...ev.blocks);
+  return [...blocks, ...nightAfter(i, ev.end)];
+}
+const fmtM = m => String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+
+// WEEKPLAN[weekday] = {slot: subject|null}. Empty or all-null = no school that day.
+function buildWeek(plan){
+  const roster = [['G1',MEM_BASE],['G2',MEM_MW],['G3',MEM_TF],['G4',MEM_MW],[null,MEM_BASE]];
+  const out = [];
+  for (let i=0;i<5;i++){
+    const per = periodsFor(plan && plan[i]);
+    out.push(per.length ? schoolDay(i, roster[i][0], roster[i][1], per)
+                        : freeDay(i, roster[i][0], roster[i][1]));
+  }
+  out.push(FRIDAY); out.push(SATURDAY);
+  return out;
+}
+
+// --- Quick-add presets -----------------------------------------------------
+// From the one-off tasks in your own export (haircut, doctor, friends, gifts,
+// books, trips) and the readiness checklist in training_master_plan.xlsx.
+const QUICKADD = [
+  {n:'Haircut', d:45, c:'people', time:'16:00',
+   note:'You booked this four times in the last year — roughly every 5–6 weeks.',
+   sub:['Book it','Reference photo if you want something different']},
+  {n:'Doctor appointment', d:60, c:'people', time:'16:00',
+   sub:['Health-fund card','Write your questions down before you go','Ask about anything you need a referral for','Book the next one before you leave']},
+  {n:'Dentist', d:45, c:'people', time:'16:00',
+   sub:['Health-fund card','Mention anything that has been hurting','Book the next one']},
+  {n:'Surgeon / PT consult', d:60, c:'people', time:'16:00',
+   note:'The readiness checklist wants these answers in writing.',
+   sub:['Questions: timeline, pain plan, PT schedule, weight-bearing rules, warning signs','Which exercises to do and which to avoid','When to stop heavy training before surgery','Flexibility targets — get them written down','Tibia or femur — confirm, so the stretch weighting is right']},
+  {n:'See a friend', d:120, c:'people', time:'18:00',
+   sub:['Confirm the time','Decide where','Tell your parents']},
+  {n:'Buy a gift', d:60, c:'meal', time:'17:00',
+   sub:['Set a budget','Two or three ideas','Order early enough that it actually arrives']},
+  {n:'Test / exam', d:60, c:'study', time:'09:00',
+   sub:['What is covered','Which study sessions cover it — put them in','Materials ready the night before','Sleep normally the night before, it beats cramming']},
+  {n:'Hand in project', d:30, c:'study', time:'17:00',
+   sub:['Check the requirements again','Final read','Submit — don’t leave it to the morning']},
+  {n:'School trip', d:120, c:'people', time:'08:00',
+   sub:['Permission form signed','Money','Snacks','Bag packed the night before']},
+  {n:'Buy a book for school', d:45, c:'study', time:'17:00',
+   sub:['Which edition','Check second-hand first','Order or go get it']},
+  {n:'Restock / shopping run', d:90, c:'meal', time:'15:00',
+   sub:['Work from the weekly review list','Protein, calcium, vitamin D','Anything running low']},
+  {n:'Practise on crutches', d:30, c:'train', time:'16:00',
+   note:'On the readiness checklist — learn the technique while you’re strong and stable.',
+   sub:['Stairs','Standing up from a chair','Walking a real distance','Ask your PT to check your technique']},
+  {n:'Set up home for recovery', d:120, c:'meal', time:'15:00',
+   note:'Readiness checklist. Worth doing well before the date.',
+   sub:['Clear trip hazards and rugs','Shower stool and grab bars','Daily items at waist height','Water and charger by the bed/sofa']},
+  {n:'Clean room', d:45, c:'meal', time:'16:00',
+   sub:['Desk','Floor','Laundry out','Bin']},
+];
+
+const T0=360, T1=1410, PXH=52, PXM=PXH/60;
+const DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const nowDate  = () => new Date();
+const nowMin   = () => { const d=nowDate(); return d.getHours()*60 + d.getMinutes(); };
+const todayIdx = () => nowDate().getDay();
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const weekStart = () => { const d=nowDate(); d.setDate(d.getDate()-d.getDay()); d.setHours(0,0,0,0); return d; };
+const dateFor = i => { const d=weekStart(); d.setDate(d.getDate()+i); return iso(d); };
+const dayNum  = i => { const d=weekStart(); d.setDate(d.getDate()+i); return d.getDate(); };
+
+const mode = 'school';
+let view='day', day = todayIdx(), open=null, fcat='people';
+let done={}, amounts={}, hist={}, extras=[];
+let PATCH = {weekly:{}, daily:{}};   // edits layered over the built-in schedule
+let ADDED = [];                      // tasks you added that repeat weekly
+let editing = null, editCat = 'study', editScope = 'week';
+let WEEK = {};            // WEEK[sundayISO][weekday][slot] = subject — a fresh set every week
+let WEEKDAYS = buildWeek(null);   // the seven days as currently planned
+let MTO = {};             // MTO[task name] = {k:'ears'|'eyes'|'body'|'micro'|'none', m:minutes}
+let editMt = null, formMt = null;                   // the multitask picker's state
+// What mtFor() says, before you override it.
+function mtAuto(b){ return mtFor(b); }
+// What the app actually uses: your override first, the estimate second.
+function mtOf(b){
+  if (!b || b.allday || !(b.d > 0) || b.brk || b.period) return null;
+  const o = MTO[b.n];
+  if (o){ if (o.k === 'none') return null;
+          return {k:o.k, m:Math.min(o.m, b.d), chunk:(mtFor(b)||{}).chunk}; }
+  return mtFor(b);
+}
+const fmt = t => String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');
+const el = (tag,cls,txt) => { const e=document.createElement(tag); if(cls)e.className=cls; if(txt)e.textContent=txt; return e; };
+const isHdr = s => /^—.*—$/.test(String(s).trim());
+const data = () => WEEKDAYS;
+const kW = (m,wd,n) => `${m}|${wd}|${n}`;
+const kD = (isoD,n)  => `${isoD}|${n}`;
+function dayTasks(d){
+  const isoD = dateFor(d);
+  const base = [...data()[d], ...ADDED.filter(a=>a.mode===mode && a.wd===d)];
+  const out = [];
+  base.forEach(b=>{
+    const w = PATCH.weekly[kW(mode,d,b.n)];
+    if (w === 'DELETE') return;
+    let x = w ? {...b, ...w, edited:true} : b;
+    const dd = PATCH.daily[kD(isoD, b.n)];
+    if (dd === 'SKIP') return;
+    if (dd) x = {...x, ...dd, edited:true};
+    out.push(x);
+  });
+  extras.filter(e=>e.date===isoD).forEach(e=>{
+    if (PATCH.daily[kD(isoD, e.n)] === 'SKIP') return;
+    out.push(e);
+  });
+  return out.sort((a,b)=>a.t-b.t);
+}
+const stepsOf  = b => b.sub || (b.steps ? b.steps.map(s=>`${fmt(s.t)} — ${s.n}`) : []);
+const realSteps= b => stepsOf(b).filter(s=>!isHdr(s));
+
+/* ---------- persistence (silently no-ops where storage is blocked) ---------- */
+const KEY='mySchedule.v2';   // v2 = the weekly-classes rebuild; v1 data is deliberately not read
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify({done,amounts,hist,extras,WEEK,PATCH,ADDED,MTO})); }catch(e){} }
+function load(){
+  try{
+    localStorage.removeItem('mySchedule.v1');   // the old summer-term save — deliberately discarded
+    const raw = localStorage.getItem(KEY); if(!raw) return;
+    const o = JSON.parse(raw);
+    done = o.done||{}; amounts = o.amounts||{}; extras = o.extras||[];
+    if (o.WEEK) WEEK = o.WEEK;
+    if (o.PATCH) PATCH = o.PATCH;
+    if (o.ADDED) ADDED = o.ADDED;
+    if (o.MTO){ MTO = o.MTO;
+      Object.values(MTO).forEach(v=>{ if (MT_MIGRATE[v.k]) v.k = MT_MIGRATE[v.k]; }); }
+    applyWeek();
+    hist = {};
+    Object.entries(o.hist||o.history||{}).forEach(([k,v])=>{
+      hist[k] = Array.isArray(v) ? Object.fromEntries(v.map(n=>[n,1])) : v;   // migrate old array form
+    });
+  }catch(e){}
+}
+
+/* ---------- the week planner ---------- */
+// A fresh set of classes every week. WEEK[sundayISO][weekday][slot] = subject
+// string if the class runs, absent if it doesn't.
+let plWk = 0;                       // which week the planner is showing: 0 = this one
+let plDay = 0;                      // which weekday the planner is editing
+const sundayOf = off => { const d=weekStart(); d.setDate(d.getDate()+off*7); return iso(d); };
+const wkLabel = off => { const d=weekStart(); d.setDate(d.getDate()+off*7);
+  const e=new Date(d); e.setDate(e.getDate()+4);
+  const f=x=>x.toLocaleDateString(undefined,{day:'numeric',month:'short'});
+  return `${f(d)} – ${f(e)}` + (off===0?' · this week':off===1?' · next week':''); };
+const planOf  = off => WEEK[sundayOf(off)] || null;
+function applyWeek(){ WEEKDAYS = buildWeek(planOf(0)); }
+function haveWeek(off){ const p=planOf(off);
+  return !!p && [0,1,2,3,4].some(d=>p[d] && Object.keys(p[d]).length); }
+function toggleTT(){
+  const p=document.getElementById('ttPanel');
+  p.classList.toggle('hidden');
+  if(!p.classList.contains('hidden')){
+    plWk = 0; plDay = [0,1,2,3,4].includes(day) ? day : 0;
+    renderPlan(); p.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+function plWeek(n){ plWk = Math.max(0, Math.min(8, plWk+n)); renderPlan(); }
+function plPick(d){ plDay = d; renderPlan(); }
+function ensureWk(off){ const k=sundayOf(off); if(!WEEK[k]) WEEK[k]={}; if(!WEEK[k][plDay]) WEEK[k][plDay]={}; return WEEK[k]; }
+function slotOn(slot, on){
+  const w = ensureWk(plWk);
+  if (on) w[plDay][slot] = w[plDay][slot] || '';
+  else delete w[plDay][slot];
+  if (plWk===0) applyWeek();
+  save(); renderPlan(); if(plWk===0) render();
+}
+function slotName(slot, val){
+  const w = ensureWk(plWk);
+  if (!(slot in w[plDay])) return;
+  w[plDay][slot] = val;
+  if (plWk===0) applyWeek();
+  save(); if(plWk===0) render();
+}
+function plAllOn(){ const w=ensureWk(plWk);
+  SLOTS.filter(p=>p!=='M').forEach(p=>{ if(!(p in w[plDay])) w[plDay][p]=''; });
+  if(plWk===0) applyWeek(); save(); renderPlan(); if(plWk===0) render(); }
+function plClearDay(){ const w=ensureWk(plWk); w[plDay]={};
+  if(plWk===0) applyWeek(); save(); renderPlan(); if(plWk===0) render();
+  toast(`No school ${DAYS[plDay]} that week`); }
+function plCopy(){
+  // copy the most recent week that has anything in it
+  let src=null;
+  for (let o=plWk-1; o>=plWk-8; o--){ if (haveWeek(o)){ src=planOf(o); break; } }
+  if (!src){ for (const k of Object.keys(WEEK).sort().reverse()){
+      if (k < sundayOf(plWk) && [0,1,2,3,4].some(d=>WEEK[k][d]&&Object.keys(WEEK[k][d]).length)){ src=WEEK[k]; break; } } }
+  if (!src){ toast('Nothing to copy from yet'); return; }
+  WEEK[sundayOf(plWk)] = JSON.parse(JSON.stringify(src));
+  if (plWk===0) applyWeek();
+  save(); renderPlan(); if(plWk===0) render(); toast('Copied the last week you filled in');
+}
+function plClearWeek(){
+  if(!confirm(`Clear every class in ${wkLabel(plWk)}?`)) return;
+  delete WEEK[sundayOf(plWk)];
+  if (plWk===0) applyWeek();
+  save(); renderPlan(); if(plWk===0) render();
+}
+function renderPlan(){
+  const w = planOf(plWk) || {}, pl = w[plDay] || {};
+  const n = SLOTS.filter(p => p in pl).length;
+  document.getElementById('plHead').innerHTML =
+    `<button onclick="plWeek(-1)" ${plWk<=0?'disabled':''}>‹</button>
+     <b>${wkLabel(plWk)}</b>
+     <button onclick="plWeek(1)">›</button>
+     <span class="spacer"></span>
+     <button onclick="plCopy()">Copy last week</button>
+     <button onclick="plClearWeek()">Clear week</button>`;
+  document.getElementById('plDays').innerHTML = [0,1,2,3,4].map(d=>{
+    const c = w[d] ? SLOTS.filter(p=>p in w[d]).length : 0;
+    return `<button class="pld${d===plDay?' on':''}" onclick="plPick(${d})" aria-pressed="${d===plDay}">
+      <span class="pn">${DN[d]}</span><span class="pc">${c?c+(c===1?' class':' classes'):'—'}</span></button>`;
+  }).join('');
+  const per = periodsFor(pl);
+  document.getElementById('plWhen').textContent = per.length
+    ? `${DAYS[plDay]}: ${fmt(per[0].t)} – ${fmt(per[per.length-1].t + per[per.length-1].d)} · ${n} ${n===1?'class':'classes'}`
+    : `${DAYS[plDay]}: no school — the day falls back to a full free day.`;
+  document.getElementById('plRows').innerHTML = BELLS.map(b=>{
+    const on = b.p in pl;
+    return `<div class="plr${on?'':' off'}">
+      <button class="plt" aria-pressed="${on}" onclick="slotOn('${b.p}',${!on})">${on?'✓':''}</button>
+      <span class="plw">${fmt(b.t)}–${fmt(b.t+b.d)}</span>
+      <span class="pll">${b.lab}</span>
+      <input class="pli" value="${String(pl[b.p]||'').replace(/"/g,'&quot;')}"
+        placeholder="${on?'subject':'no class'}" ${on?'':'disabled'}
+        oninput="slotName('${b.p}', this.value)">
+    </div>`;
+  }).join('')
+  + `<div class="bar" style="margin-top:10px"><button onclick="plAllOn()">All 8 classes on</button>
+     <button onclick="plClearDay()">No school this day</button></div>`;
+}
+function renderQuickDay(){
+  const box=document.getElementById('quickday');
+  if (day>4){ box.innerHTML=''; return; }
+  const pl=(planOf(0)||{})[day]||{}, n=SLOTS.filter(p=>p in pl).length;
+  const lbl = day===todayIdx() ? 'today' : DN[day];
+  box.innerHTML = n
+    ? `<button onclick="plDay=${day};plWk=0;toggleTT()">Edit ${lbl}’s classes (${n})</button>`
+    : `<button onclick="plDay=${day};plWk=0;toggleTT()">No classes set for ${lbl} — add them</button>`;
+}
+
+/* ---------- scoring — you log the amount, this derives the score ---------- */
+const WEIGHT = b => b.allday ? 20 : Math.min(b.d||30, 60);
+function taskScore(b, base){
+  if (b.q){
+    const a = amounts[base];
+    if (a !== undefined && a !== '') return Math.max(0, Math.min(Number(a)/b.q.target, 1));
+  }
+  const steps = realSteps(b);
+  if (steps.length){
+    const all = stepsOf(b);
+    let n=0; all.forEach((s,j)=>{ if(!isHdr(s) && done[`${base}-s${j}`]) n++; });
+    if (n) return n/steps.length;
+  }
+  return done[base] ? 1 : 0;
+}
+function dayItems(d){
+  const out = [];
+  ALLDAY.forEach((b,i)=> out.push({b:{...b, allday:true, d:0}, base:`${mode}-${d}-a${i}`}));
+  dayTasks(d).forEach((b,i)=> out.push({b, base:`${mode}-${d}-${i}`}));
+  return out;
+}
+function dayScore(d){
+  let num=0, den=0;
+  dayItems(d).forEach(({b,base})=>{ const w=WEIGHT(b); num += taskScore(b,base)*w; den += w; });
+  return den ? num/den : 0;
+}
+function dayProgress(d){
+  const it = dayItems(d);
+  return { done: it.filter(({base})=>done[base]).length, total: it.length };
+}
+const scoreCol = f => f>=0.8 ? 'var(--c6)' : f>=0.5 ? 'var(--c4)' : 'var(--c2)';
+
+/* ---------- history ---------- */
+function writeHist(d){
+  const k = dateFor(d), rec = {};
+  dayItems(d).forEach(({b,base})=>{ const s=taskScore(b,base); if(s>0) rec[b.n]=Math.round(s*100)/100; });
+  if (Object.keys(rec).length) hist[k]=rec; else delete hist[k];
+  save();
+}
+function setDone(key,v){ if(v) done[key]=true; else delete done[key]; }
+function toggleTask(d,i,allday){
+  const it = dayItems(d);
+  const item = allday ? it[i] : it.find(x=>x.base===`${mode}-${d}-${i}`);
+  const {b,base} = item, v = !done[base];
+  setDone(base,v);
+  stepsOf(b).forEach((s,j)=>{ if(!isHdr(s)) setDone(`${base}-s${j}`, v); });
+  if (b.q) amounts[base] = v ? b.q.target : '';
+  writeHist(d); render();
+}
+function toggleStep(d,base,b,j){
+  setDone(`${base}-s${j}`, !done[`${base}-s${j}`]);
+  const all = stepsOf(b).every((s,k)=> isHdr(s) || done[`${base}-s${k}`]);
+  setDone(base, all);
+  if (b.q && b.n==='Drink water'){
+    amounts[base] = stepsOf(b).filter((s,k)=>!isHdr(s)&&done[`${base}-s${k}`]).length;
+  }
+  writeHist(d); render();
+}
+function setAmount(d, base, b, val){
+  amounts[base] = val;
+  const f = taskScore(b, base);
+  setDone(base, f >= 1);
+  writeHist(d); render();
+}
+function resetDay(){
+  dayItems(day).forEach(({base})=>{
+    Object.keys(done).filter(k=>k===base||k.startsWith(base+'-')).forEach(k=>delete done[k]);
+    delete amounts[base];
+  });
+  writeHist(day); render();
+}
+const totalLogged = () => Object.values(hist).reduce((s,o)=>s+Object.keys(o).length,0);
+function weekProgress(){ let a=0,b=0; for(let d=0;d<7;d++){const p=dayProgress(d); a+=p.done; b+=p.total;} return {done:a,total:b}; }
+const clearedDays = () => [0,1,2,3,4,5,6].filter(d=>{const p=dayProgress(d); return p.total&&p.done===p.total;}).length;
+
+/* ---------- now / header ---------- */
+function currentIdx(d){ if(d!==todayIdx()) return -1; const m=nowMin(); return dayTasks(d).findIndex(b=> m>=b.t && m<b.t+b.d); }
+function nextIdx(d){ if(d!==todayIdx()) return -1; const m=nowMin(); return dayTasks(d).findIndex(b=> b.t>m); }
+function renderNow(){
+  const c=document.getElementById('nowCard');
+  if (day!==todayIdx()){ const p=dayProgress(day);
+    c.innerHTML=`<div><div class="nl">Viewing</div><div class="nt">${DAYS[day]} ${dayNum(day)}</div>
+      <div class="ns">${p.total} tasks · tap ${DN[todayIdx()]} to come back to today</div></div>`; return; }
+  const ci=currentIdx(day), ni=nextIdx(day), m=nowMin(), t=dayTasks(day);
+  if (ci>=0){ const b=t[ci];
+    c.innerHTML=`<div><div class="nl">Right now</div><div class="nt">${b.n}</div>
+      <div class="ns">${fmt(b.t)}–${fmt(b.t+b.d)} · ${b.t+b.d-m} min left`+(ni>=0?` · next: ${t[ni].n} at ${fmt(t[ni].t)}`:'')+`</div></div>`;
+  } else if (ni>=0){ const b=t[ni], mins=b.t-m, h=Math.floor(mins/60), mm=mins%60;
+    c.innerHTML=`<div><div class="nl">Next up</div><div class="nt">${b.n}</div>
+      <div class="ns">${fmt(b.t)} · in ${h?h+' h ':''}${mm} min</div></div>`;
+  } else { const p=dayProgress(day);
+    c.innerHTML=`<div><div class="nl">Day’s done</div><div class="nt">Nothing left scheduled</div>
+      <div class="ns">${p.done} of ${p.total} ticked · score ${(dayScore(day)*10).toFixed(1)}/10</div></div>`; }
+}
+/* ---------- free time ---------- */
+let mtPick = 'open';
+function hrs(m){ m=Math.round(m); if(m<=0) return '0 min';
+  const h=Math.floor(m/60), x=m%60;
+  return h ? (x ? `${h} h ${String(x).padStart(2,'0')}` : `${h} h`) : `${x} min`; }
+function freeOf(d){
+  const all = dayTasks(d).filter(b=>!b.allday && (b.d||0)>0).slice().sort((a,b)=>a.t-b.t);
+  if(all.length<2) return null;
+  // school breaks and free periods are scheduled but empty — they count as open
+  const isOpen = b => b.brk || /^Free period/.test(b.n||'');
+  const gaps=[]; let end=all[0].t+all[0].d;
+  for(let i=1;i<all.length;i++){ const b=all[i];
+    if(b.t>end) gaps.push({t:end, d:b.t-end, after:all[i-1].n, before:b.n});
+    end=Math.max(end, b.t+b.d); }
+  all.filter(isOpen).forEach(b=>gaps.push({t:b.t, d:b.d, after:b.n, before:'', sched:true}));
+  gaps.sort((x,y)=>x.t-y.t);
+  const bucket = {}; MT_ORDER_ALL.forEach(k=>bucket[k]={m:0,items:[]});
+  bucket.open.items = gaps.map(g=>({n:g.sched?g.after:`after ${g.after}`, t:g.t, d:g.d}));
+  bucket.open.m = gaps.reduce((s,g)=>s+g.d,0);
+  const chunk = {};
+  all.forEach(b=>{ if(isOpen(b)) return; const mt=mtOf(b); if(!mt||!mt.m) return;
+    bucket[mt.k].m += mt.m;
+    bucket[mt.k].items.push({n:b.n, t:b.t, d:mt.m, of:b.d, chunk:mt.chunk});
+    if(mt.chunk) chunk[mt.k] = mt.chunk; });
+  const start=all[0].t, span=end-start;
+  const stacked = MT_ORDER_ALL.filter(k=>k!=='open').reduce((a,k)=>a+bucket[k].m, 0);
+  return {gaps, bucket, chunk, stacked, total:bucket.open.m, span, start, end,
+          booked: span - bucket.open.m - stacked};
+}
+function pickMt(k){ mtPick = k; renderFree(); }
+function renderFree(){
+  const c=document.getElementById('freeBox'), f=freeOf(day);
+  if(!f){ c.innerHTML=`<div class="fk">Free time</div><div class="fv">—</div>
+    <div class="fs">Nothing scheduled on this day.</div>`; return; }
+  const isToday=day===todayIdx(), m=nowMin();
+  let left=null;
+  if(isToday && m<f.end) left=f.gaps.reduce((s,g)=>s+Math.max(0,(g.t+g.d)-Math.max(g.t,m)),0);
+  const ORD=MT_ORDER_ALL;
+  const seg = ORD.map(k=>[k,f.bucket[k].m]).filter(([,v])=>v>0);
+  const bar = seg.map(([k,v])=>`<i style="width:${v/f.span*100}%;background:var(${MTK[k].c})" title="${MTK[k].label}"></i>`).join('')
+            + `<i style="width:${Math.max(0,f.booked)/f.span*100}%;background:var(--grid)"></i>`;
+  if(!f.bucket[mtPick] || !f.bucket[mtPick].m) mtPick='open';
+  const sel=f.bucket[mtPick], K=MTK[mtPick];
+
+  const pills = ORD.map(k=>{ const on=k===mtPick, v=f.bucket[k].m;
+    return `<button class="mtp${on?' on':''}${v?'':' nil'}" style="--pc:var(${MTK[k].c})"
+      aria-pressed="${on}" onclick="pickMt('${k}')">
+      <span class="mv">${v?hrs(v):'–'}</span><span class="mk">${MTK[k].short}</span></button>`; }).join('');
+
+  let body;
+  if(mtPick==='open'){
+    const real=sel.items.filter(g=>g.d>=20).sort((a,b)=>b.d-a.d);
+    body = real.length
+      ? real.slice(0,5).map(g=>`<div class="fgap"><b>${hrs(g.d)}</b> · ${fmt(g.t)} ${g.n}</div>`).join('')
+      : `<div class="fgap">No gap longer than 20 min — it's a packed day.</div>`;
+  } else {
+    body = sel.items.sort((a,b)=>b.d-a.d).map(g=>
+      `<div class="fgap"><b>${hrs(g.d)}</b> · ${fmt(g.t)} ${g.n}<span class="mo">of ${g.of} min</span></div>`).join('');
+  }
+  const why = mtPick!=='open' && sel.items.map(i=>MT_WHY[i.n]).find(Boolean);
+
+  c.innerHTML =
+   `<div class="fk">Free time ${isToday?'today':'· '+DAYS[day]}</div>
+    <div class="fv">${hrs(f.total)} <span class="fx">open</span>${f.stacked?` <span class="fp">+ ${hrs(f.stacked)} you could stack on</span>`:''}</div>
+    <div class="fs">of ${hrs(f.span)} between ${fmt(f.start)} and ${fmt(f.end)}`
+    + (left!==null ? ` · <b style="color:var(--text-primary)">${hrs(left)} of the open time still to come</b>` : '') + `</div>
+    <div class="fbar">${bar}</div>
+    <div class="mtrow">${pills}</div>
+    <div class="mtwhat"><b>${K.label}.</b> ${K.what} ${K.fits}${
+      K.burst&&f.chunk[mtPick]?` Today’s pieces run about ${f.chunk[mtPick].toFixed(1)} min each.`:''}</div>
+    <div class="fgaps">${body}</div>`
+    + (why?`<div class="mtwhy">${why}</div>`:'');
+  const row=c.querySelector('.mtrow'), on=row&&row.querySelector('.mtp.on');
+  if (on && row.scrollWidth>row.clientWidth)
+    row.scrollTo({left: on.offsetLeft - (row.clientWidth - on.offsetWidth)/2, behavior:'smooth'});
+}
+function renderStats(){
+  const dp=dayProgress(day), wp=weekProgress();
+  let ws=0,n=0; for(let d=0;d<7;d++){ const s=dayScore(d); if(s>0){ws+=s;n++;} }
+  document.getElementById('stats').innerHTML =
+    [[`${dp.done}/${dp.total}`,'today'], [`${wp.done}/${wp.total}`,'this week'],
+     [n?(ws/n*10).toFixed(1):'–','avg score this week'], [`${clearedDays()}/7`,'days cleared']]
+    .map(([v,k])=>`<div class="st"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('');
+}
+function renderHeader(){
+  const d=nowDate();
+  const date=d.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const time=d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',hour12:false});
+  const pl=(planOf(0)||{}), set=[0,1,2,3,4].filter(i=>pl[i]&&Object.keys(pl[i]).length).length;
+  document.getElementById('today').innerHTML =
+    `<span class="clock">${date} · ${time}</span>`
+    + (set<5 ? ` · <b>${5-set} day${set===4?'':'s'} of classes not filled in yet</b>` : ' · classes are in for this week');
+}
+
+/* ---------- one-off tasks ---------- */
+let toastT=null, lastAdded=null;
+function toast(msg, undo){
+  const e=document.getElementById('toast'); e.classList.remove('hidden');
+  e.innerHTML = msg + (undo?'<button onclick="undoLast()">Undo</button>':'');
+  clearTimeout(toastT); toastT=setTimeout(()=>e.classList.add('hidden'),4500);
+}
+function undoLast(){ if(lastAdded){ removeTask(lastAdded); lastAdded=null; } document.getElementById('toast').classList.add('hidden'); }
+function prefill(o, dateStr){
+  const f=document.getElementById('form'); f.classList.remove('hidden');
+  fName.value=o.n||''; fDate.value=dateStr||o.date||dateFor(day); fTime.value=o.time||'16:00';
+  fDur.value=o.d||30; fNote.value=o.note||''; fPrio.checked=!!o.prio;
+  fSteps.value=(o.sub||[]).filter(s=>!isHdr(s)).join('\n');
+  pickCat(o.c||'people');
+  formMt = o.mt ? {...o.mt} : null; renderFormMt();
+  if (view!=='day') setView('day');
+  f.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function toggleForm(){ const f=document.getElementById('form'); f.classList.toggle('hidden');
+  if(!f.classList.contains('hidden')){ fDate.value=dateFor(day); renderFormMt(); fName.focus(); } }
+function quickAdd(i){
+  const o=QUICKADD[i], [hh,mm]=(o.time||'16:00').split(':').map(Number), id='q'+Date.now();
+  extras.push({id, n:o.n, date:dateFor(day), oneoff:true, t:hh*60+mm, d:o.d||30, c:o.c||'people', note:o.note, sub:(o.sub||[]).slice()});
+  lastAdded=id; save(); render(); toast(`Added “${o.n}” to ${DN[day]} ${dayNum(day)}`, true);
+}
+function addTask(){
+  const n=fName.value.trim(), date=fDate.value;
+  if(!n||!date){ alert('Give it a name and a date.'); return; }
+  const [hh,mm]=(fTime.value||'12:00').split(':').map(Number);
+  const dur=Math.max(5,parseInt(fDur.value)||30), fm=readMt(formMt,'fMt',dur);
+  if (fm && fm.k!=='none') MTO[n]=fm; else if (fm) MTO[n]={k:'none',m:0}; else delete MTO[n];
+  if (fRep.checked){
+    const wd = new Date(date+'T12:00:00').getDay();
+    ADDED.push({ mode, wd, n, t:hh*60+mm, d:Math.max(5,parseInt(fDur.value)||30), c:fcat,
+      prio:fPrio.checked, note:fNote.value.trim()||undefined,
+      sub:fSteps.value.split('\n').map(x=>x.trim()).filter(Boolean) });
+    ['fName','fNote','fSteps'].forEach(id=>document.getElementById(id).value='');
+    fPrio.checked=false; fRep.checked=false; formMt=null; renderFormMt(); toggleForm();
+    if (dateFor(wd)===date) day=wd;
+    save(); render(); toast(`Added to every ${DAYS[wd]}`);
+    return;
+  }
+  extras.push({ id:'x'+Date.now(), n, date, oneoff:true, t:hh*60+mm,
+    d:Math.max(5,parseInt(fDur.value)||30), c:fcat, prio:fPrio.checked,
+    note:fNote.value.trim()||undefined,
+    sub:fSteps.value.split('\n').map(x=>x.trim()).filter(Boolean) });
+  ['fName','fNote','fSteps'].forEach(id=>document.getElementById(id).value='');
+  fPrio.checked=false; formMt=null; renderFormMt(); toggleForm();
+  const wd=new Date(date+'T12:00:00').getDay(); if(dateFor(wd)===date) day=wd;
+  save(); render();
+}
+function editExtra(id, field, val){
+  const e=extras.find(x=>x.id===id); if(!e) return;
+  if(field==='date') e.date=val;
+  if(field==='time'){ const [h,m]=val.split(':').map(Number); e.t=h*60+m; }
+  const wd=new Date(e.date+'T12:00:00').getDay(); if(dateFor(wd)===e.date) day=wd;
+  open=null; save(); render();
+}
+
+/* ---------- the multitask picker, shared by the editor and the add form ---- */
+const MT_ORDER = ['none', ...MT_ORDER_ALL.filter(k=>k!=='open')];
+const mtLabel = k => k==='none' ? 'None' : MTK[k].short;
+function mtPickHTML(state, auto, dur, fnPick, fnMin, isNew){
+  let cur = state || {k:'none', m:0};
+  if (cur.k !== 'none' && !MTK[cur.k]) cur = {k: MT_MIGRATE[cur.k] || 'none', m: cur.m};
+  const btns = MT_ORDER.map(k=>{
+    const on = cur.k===k;
+    const col = k==='none' ? '--muted' : MTK[k].c;
+    return `<button type="button" class="mtb${on?' on':''}" style="--pc:var(${col})"
+      aria-pressed="${on}" onclick="${fnPick}('${k}')">${mtLabel(k)}</button>`;
+  }).join('');
+  const hint = auto ? `My estimate: <b>${MTK[auto.k].label}, ${auto.m} min</b>${auto.chunk?` in ~${auto.chunk.toFixed(1)} min pieces`:''}. Change it if that's wrong.`
+             : isNew ? 'Leave it on None unless you know you can do something else at the same time.'
+                     : 'No estimate on this one — I left it deliberately empty. Override it if you disagree.';
+  return `<div class="f" style="margin-bottom:9px">
+      <label>Can you do something else during it?</label>
+      <div class="mtbs">${btns}</div>
+      <div class="mtmin${cur.k==='none'?' off':''}">
+        <input id="${fnMin}" type="number" min="0" step="5" max="${dur}" value="${cur.k==='none'?'':cur.m}"
+               placeholder="0" ${cur.k==='none'?'disabled':''}>
+        <span>of the ${dur} min — how much of it is actually free</span>
+      </div>
+      <div class="mthint">${hint}${cur.k!=='none'?` <span class="mtd">${MTK[cur.k].fits}</span>`:''}</div>
+    </div>`;
+}
+function pickEditMt(k){
+  const inp = document.getElementById('eMt');
+  const cur = inp && inp.value !== '' ? parseInt(inp.value) : null;
+  editMt = k==='none' ? {k:'none', m:0}
+         : {k, m: cur!==null && cur>0 ? cur : (editMt && editMt.m) || editMtAuto || 15};
+  render();
+}
+function pickFormMt(k){
+  const inp = document.getElementById('fMt');
+  const cur = inp && inp.value !== '' ? parseInt(inp.value) : null;
+  formMt = k==='none' ? {k:'none', m:0}
+         : {k, m: cur!==null && cur>0 ? cur : (formMt && formMt.m) || Math.max(5, parseInt(fDur.value)||30)};
+  renderFormMt();
+}
+let editMtAuto = 0;
+function renderFormMt(){
+  const dur = Math.max(5, parseInt(fDur.value)||30);
+  document.getElementById('fMtBox').innerHTML = mtPickHTML(formMt, null, dur, 'pickFormMt', 'fMt', true);
+}
+// Read the picker back out of the DOM at save time.
+function readMt(state, inputId, dur){
+  if (!state || state.k==='none') return state && state.k==='none' ? {k:'none', m:0} : null;
+  const el = document.getElementById(inputId);
+  const v = el && el.value !== '' ? parseInt(el.value) : state.m;
+  return {k:state.k, m: Math.max(0, Math.min(isNaN(v)?state.m:v, dur))};
+}
+
+/* ---------- editing any task, in place ---------- */
+function startEdit(key, b){
+  editing = key; editCat = b.c; editScope = 'week'; open = key;
+  const auto = mtAuto(b), cur = MTO[b.n];
+  editMtAuto = auto ? auto.m : 0;
+  editMt = cur ? {...cur} : (auto ? {k:auto.k, m:auto.m} : {k:'none', m:0});
+  render();
+}
+function cancelEdit(){ editing = null; render(); }
+function saveEdit(b, wd){
+  const g = id => document.getElementById(id).value;
+  const [hh,mm] = (g('eT')||'00:00').split(':').map(Number);
+  const patch = {
+    n: g('eN').trim() || b.n,
+    t: hh*60+mm,
+    d: Math.max(1, parseInt(g('eD'))||b.d),
+    c: editCat,
+    note: g('eNote').trim() || undefined,
+    sub: g('eSteps').split('\n').map(x=>x.trim()).filter(Boolean),
+  };
+  const m = readMt(editMt, 'eMt', patch.d);
+  const auto = mtAuto({...b, ...patch});
+  if (!m || (auto && m.k===auto.k && m.m===auto.m)) delete MTO[patch.n];
+  else MTO[patch.n] = m;
+  if (patch.n !== b.n) delete MTO[b.n];
+  if (b.oneoff){                                  // a dated one-off edits itself
+    const e = extras.find(x=>x.id===b.id);
+    if (e) Object.assign(e, patch);
+  } else if (editScope === 'day'){
+    PATCH.daily[kD(dateFor(wd), b.n)] = patch;
+  } else {
+    PATCH.weekly[kW(mode, wd, b.n)] = patch;
+  }
+  editing = null; open = null; save(); render();
+  toast(editScope==='day' && !b.oneoff ? 'Changed for that date only' : 'Saved');
+}
+function skipToday(b, wd){
+  PATCH.daily[kD(dateFor(wd), b.n)] = 'SKIP';
+  open=null; save(); render(); toast(`Skipped “${b.n}” for ${DN[wd]} ${dayNum(wd)}`);
+}
+function removeWeekly(b, wd){
+  if (b.oneoff) return removeTask(b.id);
+  const a = ADDED.findIndex(x=>x.mode===mode && x.wd===wd && x.n===b.n);
+  if (a>=0) ADDED.splice(a,1); else PATCH.weekly[kW(mode,wd,b.n)] = 'DELETE';
+  open=null; save(); render(); toast(`Removed “${b.n}” from every ${DAYS[wd]}`);
+}
+function resetTask(b, wd){
+  delete PATCH.weekly[kW(mode,wd,b.n)];
+  delete PATCH.daily[kD(dateFor(wd), b.n)];
+  delete MTO[b.n];
+  open=null; save(); render(); toast('Back to the original');
+}
+function resetEdits(){
+  if(!confirm('Undo every task edit, skip and removal? Your ticks and history stay.')) return;
+  PATCH={weekly:{},daily:{}}; ADDED=[]; MTO={}; save(); render(); toast('All task edits undone');
+}
+function removeTask(id){ const i=extras.findIndex(e=>e.id===id); if(i>=0) extras.splice(i,1); open=null; save(); render(); }
+
+/* ---------- task card ---------- */
+function card(b, base, opts){
+  const {isCur=false, isPast=false, key} = opts;
+  const isOpen = open===key, isDone = !!done[base];
+  const steps = stepsOf(b), nReal = realSteps(b).length;
+  const nDone = steps.filter((s,j)=>!isHdr(s)&&done[`${base}-s${j}`]).length;
+  const f = taskScore(b, base);
+
+  const c = el('div','task'+(isOpen?' open':'')+(isDone?' done':'')+(isCur?' current':'')
+             +(isPast&&!isDone?' past':'')+(b.oneoff?' oneoff':''),'');
+  c.style.setProperty('--bc', CAT[b.c].c);
+  const row = el('div','trow','');
+  const cb = el('button','cb',''); cb.setAttribute('aria-checked',isDone);
+  cb.onclick = e => { e.stopPropagation(); opts.onToggle(); };
+  const mid = el('div','tmid','');
+  const badge = (f>0 && f<1) ? `<span class="score" style="background:${scoreCol(f)}">${Math.round(f*100)}%</span>` : '';
+  mid.innerHTML = `<div class="tt">${b.n}${b.prio?'<span class="prio">★</span>':''}${badge}`
+    + `${isCur?'<span class="badge">NOW</span>':''}${b.oneoff?'<span class="badge" style="background:var(--muted)">ONE-OFF</span>':''}${b.edited?'<span class="edited">EDITED</span>':''}</div>`
+    + `<div class="tmeta">${b.allday?'all day':b.d+' min'}`
+    + (b.q ? ` · ${amounts[base]||0}/${b.q.target} ${b.q.label}` : (nReal?` · ${nDone}/${nReal} steps`:'')) + `</div>`;
+  row.append(el('div','time', b.allday ? '' : fmt(b.t)), cb, mid, el('div','chev','▶'));
+  row.onclick = () => { open = isOpen?null:key; render(); };
+  c.appendChild(row);
+
+  if (editing === opts.key){
+    const box = el('div','steps','');
+    const wd = opts.wd;
+    const ed = el('div','ed','');
+    ed.onclick = e => e.stopPropagation();
+    ed.innerHTML = `
+      ${b.oneoff ? '' : `<div class="scope">
+        <button id="scD" aria-pressed="${editScope==='day'}" onclick="editScope='day';render()">Just ${DN[wd]} ${dayNum(wd)}</button>
+        <button id="scW" aria-pressed="${editScope==='week'}" onclick="editScope='week';render()">Every ${DAYS[wd]}</button>
+      </div>`}
+      <div class="fg">
+        <div class="f"><label>Name</label><input id="eN" value="${(b.n||'').replace(/"/g,'&quot;')}"></div>
+        <div class="f"><label>Starts</label><input id="eT" type="time" value="${fmt(b.t)}"></div>
+        <div class="f"><label>Minutes</label><input id="eD" type="number" min="1" step="5" value="${b.d}"></div>
+      </div>
+      <div class="f" style="margin-bottom:9px"><label>Colour</label>
+        <div class="swatches">${Object.entries(CAT).map(([k,v])=>
+          `<button class="sq" data-e="${k}" aria-pressed="${k===editCat}" style="background:${v.c}" onclick="editCat='${k}';render()"></button>`).join('')}</div></div>
+      <div class="f" style="margin-bottom:9px"><label>Note</label><input id="eNote" value="${(b.note||'').replace(/"/g,'&quot;')}"></div>
+      ${mtPickHTML(editMt, mtAuto(b), b.d, 'pickEditMt', 'eMt')}
+      <div class="f" style="margin-bottom:10px"><label>What's in it — one step per line</label>
+        <textarea id="eSteps" style="min-height:130px">${realSteps(b).join('\n')}</textarea></div>`;
+    box.appendChild(ed);
+    const row = el('div','acts','');
+    const mk = (label, fn, primary) => { const x=el('button','',label);
+      if(primary){ x.style.background='var(--text-primary)'; x.style.color='var(--surface-1)';
+                   x.style.borderColor='var(--text-primary)'; x.style.fontWeight='560'; }
+      x.onclick=e=>{e.stopPropagation(); fn();}; return x; };
+    row.append(mk('Save', ()=>saveEdit(b, wd), true), mk('Cancel', cancelEdit));
+    box.appendChild(row);
+    c.appendChild(box);
+    return c;
+  }
+
+  if (steps.length || b.note || b.q || b.oneoff){
+    const box = el('div','steps','');
+    if (b.note) box.appendChild(el('div','note', b.note));
+    if (b.q){
+      const q = el('div','qbox','');
+      q.innerHTML = `<label>How many <b>${b.q.label}</b> did you actually do?</label>`;
+      const inp = el('input',''); inp.type='number'; inp.min='0'; inp.step='any';
+      inp.value = amounts[base]===undefined ? '' : amounts[base];
+      inp.placeholder='0';
+      inp.onclick = e=>e.stopPropagation();
+      inp.oninput = e=>{ e.stopPropagation(); opts.onAmount(e.target.value); };
+      const of = el('span','of', `of ${b.q.target}`);
+      const sc = el('span','score',''); sc.textContent = Math.round(f*100)+'%';
+      sc.style.background = scoreCol(f);
+      q.append(inp, of, sc);
+      box.appendChild(q);
+    }
+    steps.forEach((s,j)=>{
+      if (isHdr(s)){ box.appendChild(el('div','hdr', s.replace(/—/g,'').trim())); return; }
+      const sd = !!done[`${base}-s${j}`], r = el('div','step'+(sd?' done':''),'');
+      const c2 = el('button','cb',''); c2.setAttribute('aria-checked',sd);
+      c2.onclick = e=>{ e.stopPropagation(); opts.onStep(j); };
+      const sx = el('div','sx','');
+      sx.innerHTML = String(s).replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+      r.append(c2, sx); box.appendChild(r);
+    });
+    if (!b.allday){
+      const wd = opts.wd;
+      const acts = el('div','acts','');
+      const mk = (label, fn) => { const x=el('button','',label);
+        x.onclick=e=>{e.stopPropagation(); fn();}; return x; };
+      if (b.period) acts.append(mk('No class today', ()=>{ plDay=wd; plWk=0; slotOn(b.period, false); }));
+      acts.append(mk('Edit', ()=>startEdit(opts.key, b)));
+      acts.append(mk(`Skip ${wd===todayIdx()?'today':DN[wd]}`, ()=>skipToday(b, wd)));
+      acts.append(mk(b.oneoff?'Delete':'Remove from every week', ()=>removeWeekly(b, wd)));
+      if (b.edited || MTO[b.n]) acts.append(mk('Reset to original', ()=>resetTask(b, wd)));
+      box.appendChild(acts);
+    }
+    if (b.oneoff){
+      const ed=el('div','edit','');
+      const di=el('input',''); di.type='date'; di.value=b.date;
+      di.onclick=e=>e.stopPropagation(); di.onchange=e=>{e.stopPropagation(); editExtra(b.id,'date',e.target.value);};
+      const ti=el('input',''); ti.type='time'; ti.value=fmt(b.t);
+      ti.onclick=e=>e.stopPropagation(); ti.onchange=e=>{e.stopPropagation(); editExtra(b.id,'time',e.target.value);};
+      const del=el('button','del','Delete'); del.onclick=e=>{e.stopPropagation(); removeTask(b.id);};
+      ed.append(di,ti,del); box.appendChild(ed);
+    }
+    c.appendChild(box);
+  }
+  return c;
+}
+
+function renderQuick(){
+  document.getElementById('qday').textContent =
+    day===todayIdx() ? `today · ${DN[day]} ${dayNum(day)}` : `${DAYS[day]} ${dayNum(day)}`;
+  document.getElementById('quick').innerHTML = QUICKADD
+    .map((o,i)=>`<span class="chip add" style="border-left-color:${CAT[o.c].c}" onclick="quickAdd(${i})">${o.n}</span>`).join('');
+}
+
+function renderDay(){
+  renderHeader(); renderNow(); renderFree(); renderStats(); renderQuick(); renderQuickDay();
+  const dc=document.getElementById('days'); dc.innerHTML='';
+  DAYS.forEach((nm,i)=>{
+    const p=dayProgress(i), s=dayScore(i);
+    const c=el('button','dchip'+(p.done===p.total&&p.total?' full':'')+(i===todayIdx()?' today':''),'');
+    c.setAttribute('aria-pressed', i===day);
+    c.innerHTML=`<div class="dn">${DN[i]} ${dayNum(i)}</div><div class="dp">${s>0?(s*10).toFixed(1):'–'}</div>`;
+    c.onclick=()=>{ day=i; open=null; render(); };
+    dc.appendChild(c);
+  });
+  const sel = dc.children[day];
+  if (sel && dc.scrollWidth > dc.clientWidth)
+    dc.scrollTo({left: sel.offsetLeft - (dc.clientWidth - sel.offsetWidth)/2, behavior:'smooth'});
+  const p=dayProgress(day), sc=dayScore(day);
+  document.getElementById('pn').textContent=`${p.done}/${p.total}`;
+  document.getElementById('pl').textContent='tasks ticked';
+  document.getElementById('ps').textContent = sc>0 ? (sc*10).toFixed(1) : '–';
+  document.getElementById('ps').style.color = sc>0 ? scoreCol(sc) : '';
+  document.getElementById('pf').style.width=(sc*100)+'%';
+  document.getElementById('pf').style.background = scoreCol(sc);
+
+  const ad=document.getElementById('allday'); ad.innerHTML='';
+  ALLDAY.forEach((raw,i)=>{
+    const b={...raw, allday:true, d:0, c:'wind', t:0}, base=`${mode}-${day}-a${i}`;
+    ad.appendChild(card(b, base, { key:'a'+i, wd:day,
+      onToggle:()=>toggleTask(day,i,true),
+      onStep:j=>toggleStep(day,base,b,j),
+      onAmount:v=>setAmount(day,base,b,v) }));
+  });
+
+  const list=document.getElementById('list'); list.innerHTML='';
+  const ci=currentIdx(day), isToday=day===todayIdx(), m=nowMin();
+  dayTasks(day).forEach((b,i)=>{
+    const base=`${mode}-${day}-${i}`;
+    list.appendChild(card(b, base, { key:i, wd:day, isCur:i===ci,
+      isPast:isToday && i!==ci && (b.t+b.d)<=m,
+      onToggle:()=>toggleTask(day,i,false),
+      onStep:j=>toggleStep(day,base,b,j),
+      onAmount:v=>setAmount(day,base,b,v) }));
+  });
+}
+
+/* ---------- tracker ---------- */
+const trackedDates = () => Object.keys(hist).sort();
+function scheduledOn(s){
+  const wd = new Date(s+'T12:00:00').getDay();
+  // rebuild that date's week from the plan you had in force then
+  const d = new Date(s+'T12:00:00'); d.setDate(d.getDate()-d.getDay());
+  const days = buildWeek(WEEK[iso(d)] || null);
+  return [...ALLDAY.map(b=>({...b,allday:true,d:0})), ...days[wd], ...extras.filter(e=>e.date===s)];
+}
+function taskStats(){
+  const m=new Map();
+  trackedDates().forEach(dt=>{
+    const rec=hist[dt];
+    scheduledOn(dt).forEach(b=>{
+      if(!m.has(b.n)) m.set(b.n,{n:b.n,t:b.allday?0:b.t,days:0,sum:0,full:0});
+      const r=m.get(b.n), s=rec[b.n]||0;
+      r.days++; r.sum+=s; if(s>=1) r.full++;
+    });
+  });
+  return [...m.values()].map(r=>({...r, avg:r.days?r.sum/r.days:0}));
+}
+function bandStats(){
+  const bands=[['Morning · before 12:00',1,720],['Afternoon · 12:00–17:00',720,1020],['Evening · after 17:00',1020,1440]];
+  const st=taskStats();
+  return bands.map(([label,a,b])=>{
+    const r=st.filter(x=>x.t>=a&&x.t<b);
+    const days=r.reduce((z,x)=>z+x.days,0), sum=r.reduce((z,x)=>z+x.sum,0);
+    return {label, days, avg: days?sum/days:null};
+  }).filter(b=>b.days);
+}
+const bar=(v,max,col)=>`<div class="rb" style="width:${max?Math.max(v/max*100,v?1.5:0):0}%;--bc2:${col}"></div>`;
+
+function renderTrack(){
+  const dates=trackedDates(), wrap=document.getElementById('trackView');
+  if(!dates.length){
+    wrap.innerHTML=`<div class="card"><div class="empty">
+      Nothing logged yet.<br><br>Tick tasks off — or log how much you actually did — and this fills in:
+      your score per day, which tasks you score lowest on, and which part of the day you lose.</div></div>`;
+    return;
+  }
+  const recent=dates.slice(-14);
+  const rows=recent.map(dt=>{
+    const rec=hist[dt], sched=scheduledOn(dt);
+    let num=0,den=0; sched.forEach(b=>{ const w=WEIGHT(b); num+=(rec[b.n]||0)*w; den+=w; });
+    const s=den?num/den:0;
+    const lbl=new Date(dt+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric'});
+    return {lbl, s};
+  });
+  const dayBars=rows.map(r=>`<div class="rl">${r.lbl}</div>${bar(r.s*10,10,scoreCol(r.s))}<div class="rv">${(r.s*10).toFixed(1)}</div>`).join('');
+  const overall=rows.reduce((a,r)=>a+r.s,0)/rows.length;
+
+  const st=taskStats().filter(r=>r.days>=2).sort((a,b)=>a.avg-b.avg);
+  const worst=st.filter(r=>r.avg<0.95).slice(0,10);
+  const wn=new Set(worst.map(r=>r.n));
+  const best=st.filter(r=>r.avg>0 && !wn.has(r.n)).slice(-5).reverse();
+  const rateRows=rs=>rs.map(r=>`<div class="rl" title="${r.n}">${r.n}</div>${bar(r.avg*100,100,scoreCol(r.avg))}`
+    +`<div class="rv">${(r.avg*10).toFixed(1)} · ${r.full}/${r.days} full</div>`).join('');
+
+  const bands=bandStats();
+  const bandRows=bands.map(b=>`<div class="rl">${b.label}</div>${bar(b.avg*100,100,scoreCol(b.avg))}<div class="rv">${(b.avg*10).toFixed(1)}</div>`).join('');
+  const weak=bands.length?bands.reduce((a,b)=>b.avg<a.avg?b:a):null;
+  const bestBand=bands.length?bands.reduce((a,b)=>b.avg>a.avg?b:a):null;
+
+  let callout;
+  if (dates.length<3) callout=`<div class="callout">Only ${dates.length} day${dates.length===1?'':'s'} logged — give it a week before reading much into this.</div>`;
+  else if (weak && weak.avg<0.6){
+    const names=st.filter(r=>r.avg<0.5).slice(0,3).map(r=>r.n);
+    callout=`<div class="callout"><b>${weak.label.split(' · ')[0]} is where you're losing it</b> —
+      scoring ${(weak.avg*10).toFixed(1)}/10 there against ${(bestBand.avg*10).toFixed(1)} at your best time.
+      ${names.length?`Lowest: <b>${names.join('</b>, <b>')}</b>. `:''}
+      Move them into a stronger part of the day, or cut them. A task scoring 3/10 isn't a habit.</div>`;
+  } else callout=`<div class="callout">Averaging <b>${(overall*10).toFixed(1)}/10</b> across ${dates.length} logged days. Keep going and check back in a week.</div>`;
+
+  wrap.innerHTML=`
+    <div class="stats" style="margin-bottom:16px">
+      <div class="st"><div class="v">${(overall*10).toFixed(1)}</div><div class="k">average score /10</div></div>
+      <div class="st"><div class="v">${totalLogged()}</div><div class="k">tasks logged</div></div>
+      <div class="st"><div class="v">${dates.length}</div><div class="k">days tracked</div></div>
+      <div class="st"><div class="v">${st.filter(r=>r.avg>=0.8).length}</div><div class="k">tasks above 8/10</div></div>
+    </div>
+    <div class="card">
+      <div class="tsec"><h3>Score per day</h3><p>Weighted by how long each task takes — partial credit counts.</p>
+        <div class="rows">${dayBars}</div></div>
+      <div class="tsec"><h3>Where you score lowest</h3><p>Average score, worst first. "Full" = days you hit the target completely.</p>
+        ${worst.length?`<div class="rows">${rateRows(worst)}</div>`:'<div class="empty">Not enough repeats yet.</div>'}</div>
+      <div class="tsec"><h3>What you actually nail</h3><p>Worth protecting.</p>
+        ${best.length?`<div class="rows">${rateRows(best)}</div>`:'<div class="empty">Not enough repeats yet.</div>'}</div>
+      <div class="tsec" style="margin-bottom:0"><h3>When you should be logging more</h3><p>Average score by part of the day.</p>
+        ${bandRows?`<div class="rows">${bandRows}</div>`:'<div class="empty">No data yet.</div>'}${callout}</div>
+    </div>`;
+}
+
+/* ---------- week + list ---------- */
+function renderWeek(){
+  const H=(T1-T0)*PXM, gt=document.getElementById('gt'); gt.innerHTML='';
+  gt.appendChild(el('div','dh',''));
+  DAYS.forEach((d,i)=>gt.appendChild(el('div','dh',`${d.slice(0,3)} ${dayNum(i)}`)));
+  const ax=el('div','ax',''); ax.style.height=H+'px';
+  for(let t=T0;t<=T1;t+=60){const s=el('div','t',fmt(t)); s.style.top=((t-T0)*PXM)+'px'; ax.appendChild(s);}
+  gt.appendChild(ax);
+  for(let di=0;di<7;di++){
+    const col=el('div','col',''); col.style.height=H+'px';
+    for(let t=T0;t<=T1;t+=60){const l=el('div','hl',''); l.style.top=((t-T0)*PXM)+'px'; col.appendChild(l);}
+    dayTasks(di).forEach((b,i)=>{
+      const h=Math.max(b.d*PXM,13), n=el('button','blk'+(h<24?' sm':''),'');
+      n.style.top=((b.t-T0)*PXM)+'px'; n.style.height=(h-2)+'px';
+      n.style.setProperty('--bc',CAT[b.c].c);
+      n.innerHTML=`<div class="ti">${b.n}</div><div class="tm">${fmt(b.t)}–${fmt(b.t+b.d)}</div>`;
+      n.onclick=()=>{ day=di; open=i; setView('day'); };
+      col.appendChild(n);
+    });
+    if(di===todayIdx()){ const m=nowMin();
+      if(m>=T0&&m<=T1){ const nl=el('div','nowline',''); nl.style.top=((m-T0)*PXM)+'px'; col.appendChild(nl);} }
+    gt.appendChild(col);
+  }
+  document.getElementById('legend').innerHTML=Object.values(CAT)
+    .map(v=>`<span><i class="sw2" style="background:${v.c}"></i>${v.label}</span>`).join('');
+}
+function renderTable(){
+  let h='<div class="card"><table><thead><tr><th>Day</th><th>Time</th><th>Task</th><th>Steps</th></tr></thead><tbody>';
+  data().forEach((dayArr,i)=>{
+    const flat=[]; dayArr.forEach(x=> x.steps?flat.push(...x.steps):flat.push(x));
+    flat.sort((a,b)=>a.t-b.t).forEach((b,j)=>{
+      const s=(b.sub||[]).filter(x=>!isHdr(x));
+      h+=`<tr><td>${j===0?DAYS[i]:''}</td><td class="tw">${fmt(b.t)}–${fmt(b.t+b.d)}</td>`
+       +`<td><span class="dot" style="background:${CAT[b.c].c}"></span>${b.n}</td>`
+       +`<td class="sw">${s.length?s.join(' · '):'—'}</td></tr>`;
+    });
+  });
+  document.getElementById('tableView').innerHTML=h+'</tbody></table></div>';
+}
+
+/* ---------- export ---------- */
+function saveProgress(){
+  const blob=new Blob([JSON.stringify({saved:nowDate().toISOString(),done,amounts,hist,extras},null,1)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`schedule-progress-${iso(nowDate())}.json`; a.click(); URL.revokeObjectURL(a.href);
+}
+function loadProgress(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const o=JSON.parse(r.result);
+    done=o.done||{}; amounts=o.amounts||{}; extras=o.extras||[];
+    hist={}; Object.entries(o.hist||o.history||{}).forEach(([k,v])=>{
+      hist[k]=Array.isArray(v)?Object.fromEntries(v.map(n=>[n,1])):v; });
+    save(); render();
+  }catch(err){ alert('Could not read that file.'); } };
+  r.readAsText(f); e.target.value='';
+}
+const icsEsc = s => String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+function fold(l){ const o=[]; let s=l; while(s.length>73){ o.push(s.slice(0,73)); s=' '+s.slice(73);} o.push(s); return o.join('\r\n'); }
+const stampFor=(d,m)=>d.replace(/-/g,'')+'T'+String(Math.floor(m/60)).padStart(2,'0')+String(m%60).padStart(2,'0')+'00';
+function exportICS(){
+  const BY=['SU','MO','TU','WE','TH','FR','SA'];
+  const stamp=nowDate().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//my-schedule//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:My schedule ('+mode+')'];
+  let n=0;
+  for(let d=0;d<7;d++){
+    const date=dateFor(d);
+    data()[d].forEach(b=>{
+      const steps=(b.sub||(b.steps?b.steps.map(s=>`${fmt(s.t)} — ${s.n}`):[])).filter(x=>!isHdr(x));
+      L.push('BEGIN:VEVENT',`UID:wk${d}-${n++}-${date}@my-schedule`,`DTSTAMP:${stamp}`,
+        `DTSTART:${stampFor(date,b.t)}`,`DTEND:${stampFor(date,b.t+b.d)}`,
+        `RRULE:FREQ=WEEKLY;BYDAY=${BY[d]}`,
+        fold('SUMMARY:'+icsEsc(b.n)),
+        fold('DESCRIPTION:'+icsEsc([b.note,...steps].filter(Boolean).join('\n'))),'END:VEVENT');
+    });
+  }
+  extras.forEach(e=>{
+    L.push('BEGIN:VEVENT',`UID:one${n++}-${e.id}@my-schedule`,`DTSTAMP:${stamp}`,
+      `DTSTART:${stampFor(e.date,e.t)}`,`DTEND:${stampFor(e.date,e.t+e.d)}`,
+      fold('SUMMARY:'+icsEsc(e.n)),
+      fold('DESCRIPTION:'+icsEsc([e.note,...(e.sub||[])].filter(Boolean).join('\n'))),'END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  const blob=new Blob([L.join('\r\n')],{type:'text/calendar'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`my-schedule-${mode}.ics`; a.click(); URL.revokeObjectURL(a.href);
+  toast('Calendar file downloaded — import it into Google or Apple Calendar');
+}
+
+/* ---------- plumbing ---------- */
+function render(){
+  document.getElementById('dayView').classList.toggle('hidden', view!=='day');
+  document.getElementById('weekView').classList.toggle('hidden', view!=='week');
+  document.getElementById('tableView').classList.toggle('hidden', view!=='table');
+  document.getElementById('trackView').classList.toggle('hidden', view!=='track');
+  if(view==='day') renderDay(); else if(view==='week') renderWeek();
+  else if(view==='table') renderTable(); else renderTrack();
+}
+function setView(v){ view=v;
+  [['vDay','day'],['vWeek','week'],['vTable','table'],['vTrack','track']]
+    .forEach(([id,k])=>document.getElementById(id).setAttribute('aria-pressed',v===k));
+  render(); }
+function toggleTheme(){ const d=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',d?'light':'dark'); bTheme.textContent=d?'Dark':'Light'; }
+function pickCat(k){ fcat=k; document.querySelectorAll('.sq').forEach(s=>s.setAttribute('aria-pressed',s.dataset.c===k)); }
+function showInfo(o){
+  const d=document.getElementById('detail'); d.className='card'; d.style.marginTop='12px';
+  d.innerHTML=`<div style="font-weight:640;font-size:15px">${o.n}</div>`
+    +(o.when?`<div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${o.when} · ${o.d} min</div>`:'')
+    +'<div style="margin-top:10px">'+o.sub.map(s=>`<div class="step"><div class="cb" style="pointer-events:none"></div><div class="sx">${s}</div></div>`).join('')+'</div>';
+  d.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+document.getElementById('fCat').innerHTML=Object.entries(CAT)
+  .map(([k,v])=>`<button class="sq" data-c="${k}" aria-pressed="${k===fcat}" title="${v.label}" style="background:${v.c}" onclick="pickCat('${k}')"></button>`).join('');
+document.getElementById('oneoff').innerHTML=ONEOFF
+  .map((o,i)=>`<span class="chip add" style="border-left-color:var(--c4)" onclick="prefill(ONEOFF[${i}])">${o.n} <b>${o.when}</b></span>`).join('');
+document.getElementById('foot').textContent=
+  'Sources: structureddiagnostics20260816 · training_master_plan.xlsx · Memory & Awareness Protocol. Times in Asia/Jerusalem, 24h. Your surgical team’s protocol comes first.';
+
+load();
+render();
+let liveWk = sundayOf(0);
+setInterval(()=>{
+  const w = sundayOf(0);
+  if (w !== liveWk){ liveWk = w; applyWeek(); }   // the week rolled over
+  render();
+},30000);
+if ('serviceWorker' in navigator && location.protocol.startsWith('http'))
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
