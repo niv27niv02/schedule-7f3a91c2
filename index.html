@@ -44,6 +44,34 @@
   .wrap { max-width:920px; margin:0 auto; }
   h1 { font-size:23px; font-weight:640; margin:0 0 3px; letter-spacing:-0.01em; }
   .sub { color:var(--text-secondary); margin:0 0 20px; font-size:13.5px; }
+  @media (max-width:759px){
+    body { padding:14px 14px calc(74px + env(safe-area-inset-bottom)); }
+    /* The app's own name is a waste of a phone screen — the date is the useful heading. */
+    h1 { display:none; }
+    .sub { margin:0 0 10px; font-size:calc(var(--fs) * .95); color:var(--text-primary); font-weight:560; }
+    .sub b { color:var(--c2); }
+    /* On a phone the day itself comes first. Summaries go underneath. */
+    /* :not(.hidden) matters — an ID rule would otherwise outrank .hidden{display:none} */
+    #dayView:not(.hidden) { display:flex; flex-direction:column; }
+    #nowCard   { order:1 }
+    #habits    { order:2 }
+    #habitOpen { order:3 }
+    #wknav     { order:4 }
+    #days      { order:5 }
+    #quickday  { order:6 }
+    #dayView > .daysec { order:7 }
+    #list      { order:8 }
+    #freeBox   { order:9;  margin-top:16px }
+    #stats     { order:10 }
+    #dayView > .quickbox { order:11; margin-top:14px }
+    #form      { order:12 }
+    #toast     { order:13 }
+    #dayView > .prog { order:14 }
+    #schedHead { display:none }
+    /* the List view's step column is too much for a phone — the day view has it */
+    #tableView td.sw, #tableView th:last-child { display:none }
+    .free.shut .fs { display:none }
+  }
 
   .bar { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:14px; }
   button { font:inherit; font-size:13px; padding:7px 13px; border-radius:8px; border:1px solid var(--border);
@@ -64,11 +92,11 @@
   .dchip.full { border-color:var(--c6); }
 
   /* progress */
-  .prog { display:flex; align-items:center; gap:12px; background:var(--surface-1); border:1px solid var(--border);
+  .prog { display:flex; align-items:center; flex-wrap:wrap; gap:12px; background:var(--surface-1); border:1px solid var(--border);
           border-radius:12px; padding:13px 16px; margin-bottom:14px; }
   .prog .n { font-size:22px; font-weight:650; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; }
   .prog .l { font-size:12px; color:var(--muted); }
-  .track { flex:1; height:8px; background:var(--grid); border-radius:99px; overflow:hidden; }
+  .track { flex:1 1 110px; min-width:90px; height:8px; background:var(--grid); border-radius:99px; overflow:hidden; }
   .fill { height:100%; background:var(--c6); border-radius:99px; transition:width .25s ease; }
 
   /* task list */
@@ -128,6 +156,7 @@
   .blk.sm .tm { display:none; }
   .blk:hover { box-shadow:0 0 0 2px var(--surface-1), 0 0 0 3px var(--bc); z-index:5; }
 
+  .tscroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
   table { border-collapse:collapse; width:100%; font-size:12.5px; }
   th,td { text-align:left; padding:7px 9px; border-bottom:1px solid var(--grid); vertical-align:top; }
   th { color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
@@ -140,6 +169,7 @@
           border-left:3px solid var(--c5); background:var(--surface-1); }
   .chip b { color:var(--muted); font-weight:400; }
   .chip:hover { background:var(--grid); }
+  .chip.on { background:var(--text-primary); color:var(--surface-1); border-color:var(--text-primary); font-weight:560; }
   .legend { display:flex; gap:12px; flex-wrap:wrap; margin:0 0 12px; font-size:11.5px; color:var(--text-secondary); }
   .legend span { display:inline-flex; align-items:center; gap:5px; }
   .sw2 { width:9px; height:9px; border-radius:3px; display:inline-block; }
@@ -148,12 +178,18 @@
   .now .nl { font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; font-weight:650; }
   .now .nt { font-size:15px; font-weight:600; margin-top:1px; }
   .now .ns { font-size:12px; color:var(--text-secondary); margin-top:1px; font-variant-numeric:tabular-nums; }
-  .stats { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
-  .st { flex:1 1 96px; background:var(--surface-1); border:1px solid var(--border); border-radius:10px; padding:10px 13px; }
-  .st .v { font-size:19px; font-weight:650; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; }
+  .stats { display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
+  .stats::-webkit-scrollbar { display:none; }
+  .st { flex:1 0 auto; min-width:84px; background:var(--surface-1); border:1px solid var(--border);
+        border-radius:10px; padding:calc(8px * var(--tap)) calc(11px * var(--tap)); }
+  .st .v { font-size:17px; font-weight:650; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; }
   .st .k { font-size:10.5px; color:var(--muted); margin-top:2px; }
   .free { background:var(--surface-1); border:1px solid var(--border); border-left:3px solid var(--c3);
-          border-radius:12px; padding:11px 14px; margin-bottom:12px; }
+          border-radius:var(--radius); padding:calc(10px * var(--tap)) 14px; margin-bottom:12px; }
+  .fhead { display:flex; align-items:center; justify-content:space-between; width:100%; text-align:left;
+           border:0; background:none; padding:0; cursor:pointer; }
+  .free.shut .mtrow, .free.shut .mtwhat, .free.shut .fgaps, .free.shut .mtwhy { display:none; }
+  .free.shut .fs { display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
   .free .fk { font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; font-weight:650; }
   .free .fv { font-size:19px; font-weight:650; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; margin-top:1px; }
   .free .fs { font-size:12px; color:var(--text-secondary); margin-top:2px; font-variant-numeric:tabular-nums; }
@@ -179,7 +215,8 @@
   .mtp .mk { display:block; font-size:10px; color:var(--muted); margin-top:1px; white-space:nowrap; }
   .mtp.on { background:color-mix(in srgb, var(--pc) 14%, var(--surface-1)); border-color:var(--pc); }
   .mtp.nil { opacity:.45; }
-  .mtwhat { font-size:11.5px; color:var(--text-secondary); margin-top:10px; line-height:1.45; }
+  .mtwhat { font-size:11.5px; color:var(--text-secondary); margin-top:10px; line-height:1.45; cursor:pointer; }
+  .mtwhat.clipped { display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
   .mtwhat b { color:var(--text-primary); font-weight:620; }
   .mtwhy { font-size:11px; color:var(--muted); margin-top:7px; font-style:italic; line-height:1.45; }
   .plDays { display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; padding-bottom:2px; }
@@ -190,6 +227,77 @@
   .pld.on { background:var(--text-primary); border-color:var(--text-primary); }
   .pld.on .pn, .pld.on .pc { color:var(--surface-1); }
   .plWhen { font-size:12px; color:var(--text-secondary); margin:0 0 10px; font-variant-numeric:tabular-nums; }
+  .plt2 { color:var(--muted); font-variant-numeric:normal; }
+  .plt2.chg { color:var(--c2); font-weight:600; }
+  .wknav { display:flex; align-items:center; gap:7px; margin-bottom:9px; }
+  .wknav .wl { font-size:12.5px; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
+  .wknav button { padding:5px 11px; font-size:13px; }
+  .wknav .wnow { margin-left:auto; }
+  .mogrid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  .moh { font-size:10.5px; color:var(--muted); font-weight:650; text-align:center; padding:0 0 5px;
+         text-transform:uppercase; letter-spacing:.04em; }
+  .mo { position:relative; aspect-ratio:1; min-width:0; padding:5px 3px 9px; border-radius:9px;
+        border:1px solid var(--border); background:var(--surface-1); cursor:pointer;
+        display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:1px; }
+  .mo.out { opacity:.35; }
+  .mo.now { border-color:var(--c2); box-shadow:inset 0 0 0 1.5px var(--c2); }
+  .mo .mod { font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .mo .moc { font-size:10px; color:var(--muted); }
+  .mo .moe { font-size:8px; color:var(--c4); }
+  .mo .mos { position:absolute; left:5px; right:5px; bottom:4px; height:3px; border-radius:2px; }
+  .room { display:inline-block; padding:1px 6px; border-radius:5px; background:var(--grid);
+          color:var(--text-primary); font-weight:620; font-size:11px; unicode-bidi:isolate; }
+  .pbadge { display:inline-block; min-width:17px; padding:1px 5px; margin-left:6px; border-radius:9px;
+            background:var(--c2); color:#fff; font-size:10.5px; font-weight:700; text-align:center; vertical-align:1px; }
+  .pbadge:empty { display:none; }
+  .grp { margin-bottom:9px; padding-bottom:9px; border-bottom:1px solid var(--grid); }
+  .grp .gs { font-size:12px; font-weight:650; color:var(--text-secondary); margin-bottom:5px; unicode-bidi:isolate; }
+  .grp.has .gs { color:var(--c6); }
+  .grp.wanted { border-left:3px solid var(--c4); padding-left:9px; border-radius:0 6px 6px 0;
+                background:color-mix(in srgb, var(--c4) 9%, transparent); }
+  .grp.wanted .gs::after { content:' — tick yours'; color:var(--c4); font-weight:600; }
+  .swapnote { font-size:12.5px; line-height:1.55; margin:0 0 12px; padding:10px 12px; border-radius:9px;
+              background:color-mix(in srgb, var(--c4) 13%, var(--surface-1));
+              border:1px solid color-mix(in srgb, var(--c4) 35%, transparent); }
+  .gg { display:inline-block; text-align:left; margin:0 5px 5px 0; padding:5px 9px; border-radius:8px;
+        border:1px solid var(--border); background:var(--surface-1); cursor:pointer; max-width:100%; }
+  .gg .gt { display:block; font-size:12px; color:var(--text-primary); unicode-bidi:isolate; }
+  .gg .gm { display:block; font-size:10px; color:var(--muted); unicode-bidi:isolate; }
+  .gg.on { background:color-mix(in srgb, var(--c6) 16%, var(--surface-1)); border-color:var(--c6); }
+  .gg.on .gt { font-weight:650; }
+  .prop { background:var(--surface-1); border:1px solid var(--border); border-left:3px solid var(--pc);
+          border-radius:11px; padding:10px 13px; margin-bottom:8px; }
+  .prop .ph { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .prop .pk { font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--pc); }
+  .prop .pd { font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .prop .pt { font-size:14px; font-weight:600; margin-top:2px; unicode-bidi:isolate; line-height:1.35; }
+  .prop .pn2 { font-size:11.5px; color:var(--text-secondary); margin-top:2px; }
+  .prop .pa { display:flex; gap:6px; align-items:center; margin-top:9px; flex-wrap:wrap; }
+  .prop .pa button { font-size:12px; padding:5px 11px; }
+  .prop .psrc { font-size:10.5px; color:var(--muted); margin-left:auto; }
+  .synclog { margin-top:10px; font-size:11.5px; color:var(--text-secondary); line-height:1.6;
+             border-top:1px solid var(--grid); padding-top:8px; }
+  .synclog div { font-variant-numeric:tabular-nums; }
+  .tpsum { font-size:12.5px; color:var(--text-secondary); margin:0 0 12px; }
+  .tp { position:relative; background:var(--surface-1); border:1px solid var(--border); border-radius:11px;
+        padding:11px 13px 10px; margin-bottom:8px; overflow:hidden; }
+  .tp.fin { opacity:.55; }
+  .tpb { position:absolute; left:0; right:0; bottom:0; height:3px; background:var(--grid); }
+  .tpf { height:100%; background:var(--c4); }
+  .tp.fin .tpf { background:var(--c3); }
+  .tph { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .tps { font-size:11px; color:var(--muted); font-weight:650; unicode-bidi:isolate; }
+  .tpn { font-size:14px; font-weight:600; margin-top:2px; unicode-bidi:isolate; line-height:1.35; }
+  .tpnow { font-size:9.5px; font-weight:700; letter-spacing:.06em; padding:2px 6px; border-radius:5px;
+           background:var(--c4); color:#fff; }
+  .tpm { font-size:11.5px; color:var(--text-secondary); margin-top:2px; font-variant-numeric:tabular-nums; }
+  .tpa { display:flex; gap:5px; margin-top:8px; flex-wrap:wrap; }
+  .tpa button { font-size:11.5px; padding:4px 9px; }
+  .topicbox { background:color-mix(in srgb, var(--c4) 12%, var(--surface-1)); border:1px solid var(--border);
+              border-left:3px solid var(--c4); border-radius:9px; padding:9px 11px; margin-bottom:9px; }
+  .topicbox .tl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; font-weight:650; }
+  .topicbox .tt2 { font-size:13.5px; font-weight:600; margin-top:1px; }
+  .topicbox .tm2 { font-size:11.5px; color:var(--text-secondary); margin-top:2px; font-variant-numeric:tabular-nums; }
   .plr { display:flex; align-items:center; gap:9px; padding:6px 0; border-top:1px solid var(--grid); }
   .plr.off { opacity:.5; }
   .plt { flex:0 0 26px; width:26px; height:26px; padding:0; border-radius:7px; font-size:13px; line-height:1;
@@ -235,6 +343,17 @@
   .sq { width:28px; height:28px; border-radius:8px; border:2px solid transparent; cursor:pointer; padding:0; }
   .sq[aria-pressed="true"] { border-color:var(--text-primary); }
   .chkline { display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:10px; }
+
+  /* skincare panel */
+  .skinnow { font-size:13px; line-height:1.55; border-left:3px solid var(--accent);
+             padding:9px 0 9px 11px; background:var(--plane); border-radius:0 8px 8px 0; }
+  .skinask { font-size:12.5px; line-height:1.5; margin-top:12px; padding:10px 12px; border-radius:9px;
+             background:color-mix(in srgb, var(--c4) 13%, var(--surface-1));
+             border:1px solid color-mix(in srgb, var(--c4) 35%, transparent); }
+  .skintab { margin-top:12px; font-size:12.5px; }
+  .skintab td { padding:5px 9px; }
+  .skintab td:first-child { color:var(--text-secondary); width:96px; }
+  button.go { background:var(--text-primary); color:var(--surface-1); border-color:var(--text-primary); font-weight:560; }
   .prio { color:var(--c4); margin-left:6px; }
   .task.oneoff { border-style:dashed; }
   .del { font-size:11px; color:var(--muted); background:none; border:0; cursor:pointer; padding:2px 6px; }
@@ -255,6 +374,10 @@
              background:color-mix(in srgb, var(--c2) 8%, var(--surface-1)); margin-top:12px; }
   .chip.add::after { content:'+'; margin-left:7px; color:var(--muted); font-weight:600; }
   .chip.add:hover::after { color:var(--text-primary); }
+  .qhead { display:flex; align-items:center; justify-content:space-between; width:100%; text-align:left;
+           border:0; background:none; padding:2px 0; font-size:12.5px; color:var(--text-secondary); cursor:pointer; }
+  .qchev { transition:transform .18s ease; color:var(--muted); }
+  .qchev.open { transform:rotate(180deg); }
   .quickbox { background:var(--surface-1); border:1px solid var(--border); border-radius:12px;
               padding:13px 15px; margin-bottom:12px; }
   .qlabel { font-size:10.5px; color:var(--muted); font-weight:600; text-transform:uppercase;
@@ -315,6 +438,110 @@
     border-radius:7px; border:1px solid var(--border); background:var(--plane); color:var(--text-primary); }
   .subgrid { display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center; }
   .cancelled .tt { text-decoration:line-through; }
+  /* ---- density ---- */
+  :root { --gap:7px; --fs:14px; --tap:1; --radius:11px; }
+  :root[data-density="compact"] { --gap:5px;  --fs:12.5px; --tap:.8;  --radius:9px; }
+  :root[data-density="large"]   { --gap:10px; --fs:16px;   --tap:1.2; --radius:14px; }
+  body { font-size:var(--fs); }
+  .list { gap:var(--gap); }
+  .task { border-radius:var(--radius); }
+  .trow { padding:calc(11px * var(--tap)) calc(13px * var(--tap)); gap:calc(11px * var(--tap)); }
+  .tt { font-size:calc(var(--fs) * 1.0); }
+  .tmeta, .time { font-size:calc(var(--fs) * .84); }
+  .time { width:calc(44px * var(--tap)); }
+  button { padding:calc(7px * var(--tap)) calc(13px * var(--tap)); font-size:calc(var(--fs) * .93); }
+  .cb { width:calc(21px * var(--tap)); height:calc(21px * var(--tap)); }
+  .daysec { font-size:calc(var(--fs) * .79); }
+  .dchip { padding:calc(9px * var(--tap)) 6px calc(8px * var(--tap)); min-width:calc(72px * var(--tap)); }
+  .step { padding:calc(7px * var(--tap)) 0; }
+  .step .sx { font-size:calc(var(--fs) * .89); }
+
+  /* ---- accent ---- */
+  :root { --accent:#eb6834; }
+  input[type=checkbox], input[type=range], progress { accent-color:var(--accent); }
+  .now, .task.current { border-left-color:var(--accent); }
+  .badge, .pbadge, .tbdot { background:var(--accent); }
+  .dchip.today { box-shadow:inset 0 0 0 1.5px var(--accent); }
+  .mo.now { border-color:var(--accent); box-shadow:inset 0 0 0 1.5px var(--accent); }
+  button[aria-pressed="true"], .seg.on, .tb.on { --on:var(--accent); }
+
+  /* ---- movement ---- */
+  :root[data-anim="on"] .task,
+  :root[data-anim="on"] .hb,
+  :root[data-anim="on"] .prop,
+  :root[data-anim="on"] .tp { transition:background .18s ease, border-color .18s ease,
+        box-shadow .18s ease, opacity .18s ease, transform .14s cubic-bezier(.2,.8,.3,1); }
+  :root[data-anim="on"] .task:active, :root[data-anim="on"] .hb:active { transform:scale(.985); }
+  :root[data-anim="on"] .cb { transition:background .16s ease, border-color .16s ease, transform .16s cubic-bezier(.2,1.4,.4,1); }
+  :root[data-anim="on"] .cb[aria-checked="true"] { transform:scale(1.06); }
+  :root[data-anim="on"] .fill, :root[data-anim="on"] .tpf, :root[data-anim="on"] .fbar i,
+  :root[data-anim="on"] .hbr { transition:width .45s cubic-bezier(.2,.8,.2,1), background .3s ease; }
+  :root[data-anim="on"] .steps { animation:grow .22s cubic-bezier(.2,.8,.3,1); }
+  :root[data-anim="on"] #dayView, :root[data-anim="on"] #weekView, :root[data-anim="on"] #monthView,
+  :root[data-anim="on"] #studyView, :root[data-anim="on"] #trackView, :root[data-anim="on"] #tableView { animation:fadeup .2s ease both; }
+  :root[data-anim="on"] .sheet { animation:slideup .24s cubic-bezier(.2,.8,.3,1) both; }
+  @keyframes grow { from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:none} }
+  @keyframes fadeup { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:none} }
+  @keyframes slideup { from{transform:translateY(100%)} to{transform:none} }
+  @keyframes pop { 0%{transform:scale(1)} 40%{transform:scale(1.13)} 100%{transform:scale(1)} }
+  :root[data-anim="on"] .hb.justdone { animation:pop .3s cubic-bezier(.2,1.4,.4,1); }
+  @media (prefers-reduced-motion: reduce) { :root * { animation:none !important; transition:none !important; } }
+
+  /* ---- habit strip ---- */
+  .habits { display:flex; gap:6px; overflow-x:auto; padding:0 0 3px; margin-bottom:10px;
+            scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  .habits::-webkit-scrollbar { display:none; }
+  .hb { position:relative; flex:0 0 auto; display:flex; align-items:center; gap:6px;
+        padding:calc(7px * var(--tap)) calc(11px * var(--tap)); border-radius:999px; cursor:pointer;
+        border:1px solid var(--border); background:var(--surface-1); overflow:hidden; }
+  .hb .hbr { position:absolute; left:0; top:0; bottom:0; width:var(--p); background:var(--accent);
+             opacity:.13; pointer-events:none; }
+  .hb .hbn { font-size:calc(var(--fs) * .86); color:var(--text-primary); white-space:nowrap; position:relative; }
+  .hb .hbs { font-size:calc(var(--fs) * .79); color:var(--muted); font-variant-numeric:tabular-nums; position:relative; }
+  .hb .hbk { font-size:calc(var(--fs) * .79); color:var(--c6); font-weight:800; position:relative; }
+  .hb.done { border-color:var(--c6); background:color-mix(in srgb, var(--c6) 10%, var(--surface-1)); }
+  .hb.done .hbn { color:var(--text-secondary); }
+  .hb.open { border-color:var(--accent); box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .habitOpen:not(:empty) { margin-bottom:12px; }
+
+  /* ---- segmented controls ---- */
+  .segs { display:flex; gap:0; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .seg { flex:1; border:0; border-radius:0; background:var(--surface-1); font-size:12.5px;
+         padding:calc(8px * var(--tap)) 6px; cursor:pointer; color:var(--text-secondary); }
+  .seg + .seg { border-left:1px solid var(--border); }
+  .seg.on { background:var(--accent); color:#fff; font-weight:600; }
+  .swatches .sq.on { box-shadow:0 0 0 2px var(--surface-1), 0 0 0 4px var(--text-primary); }
+
+  /* ---- bottom tab bar ---- */
+  .tabbar { position:fixed; left:0; right:0; bottom:0; z-index:40; display:flex;
+            background:color-mix(in srgb, var(--surface-1) 92%, transparent);
+            backdrop-filter:saturate(180%) blur(14px); -webkit-backdrop-filter:saturate(180%) blur(14px);
+            border-top:1px solid var(--border); padding-bottom:env(safe-area-inset-bottom); }
+  .tb { flex:1; border:0; background:none; border-radius:0; padding:7px 2px 6px; cursor:pointer;
+        display:flex; flex-direction:column; align-items:center; gap:2px; color:var(--muted); position:relative; }
+  .tb svg { width:21px; height:21px; }
+  .tb span { font-size:10px; font-weight:600; letter-spacing:.01em; }
+  .tb.on { color:var(--accent); }
+  .tb .tbdot { position:absolute; top:3px; right:calc(50% - 20px); min-width:15px; padding:0 4px;
+               border-radius:8px; font-size:9.5px; font-weight:700; font-style:normal; color:#fff; line-height:15px; }
+  body { padding-bottom:calc(74px + env(safe-area-inset-bottom)); }
+  .hidetop { display:none; }
+  @media (min-width:760px){ .tabbar { display:none; } .hidetop { display:flex; }
+    body { padding-bottom:60px; } }
+
+  /* ---- more sheet ---- */
+  #moreSheet { position:fixed; inset:0; z-index:60; display:flex; align-items:flex-end; }
+  #moreSheet.hidden { display:none; }
+  .sheetbg { position:absolute; inset:0; background:rgba(0,0,0,.42); }
+  .sheet { position:relative; width:100%; background:var(--surface-1); border-radius:18px 18px 0 0;
+           padding:8px 12px calc(14px + env(safe-area-inset-bottom)); max-height:80vh; overflow:auto; }
+  .sheeth { text-align:center; font-size:12px; color:var(--muted); font-weight:650; padding:8px 0 10px;
+            text-transform:uppercase; letter-spacing:.06em; }
+  .sheetb { display:flex; align-items:center; justify-content:space-between; width:100%; text-align:left;
+            margin-bottom:6px; padding:13px 15px; border-radius:11px; font-size:14.5px;
+            border:1px solid var(--border); background:var(--surface-1); cursor:pointer; color:var(--text-primary); }
+  .sheetb.cancel { justify-content:center; color:var(--text-secondary); margin-top:6px; }
+
   .hidden { display:none; }
   footer { margin-top:26px; color:var(--muted); font-size:11px; }
 </style>
@@ -324,26 +551,62 @@
   <h1>My schedule</h1>
   <p class="sub" id="today">…</p>
 
-  <div class="bar">
+  <div class="bar hidetop">
     <button id="vDay"   aria-pressed="true"  onclick="setView('day')">Day</button>
     <button id="vWeek"  aria-pressed="false" onclick="setView('week')">Week</button>
     <button id="vTable" aria-pressed="false" onclick="setView('table')">List</button>
+    <button id="vMonth" aria-pressed="false" onclick="setView('month')">Month</button>
+    <button id="vStudy" aria-pressed="false" onclick="setView('study')">Study</button>
     <button id="vTrack" aria-pressed="false" onclick="setView('track')">Tracker</button>
     <span class="spacer"></span>
-    <button onclick="toggleTT()" id="bTT">Classes</button>
+    <button onclick="toggleTT()" id="bTT">Classes<span class="pbadge" id="propBadge2"></span></button>
+    <button onclick="toggleSkin()">Skincare</button>
     <button onclick="toggleTheme()" id="bTheme">Dark</button>
   </div>
 
+  <div id="lookPanel" class="form hidden">
+    <h3>Look &amp; feel</h3>
+    <div id="lookBox"></div>
+    <div class="bar" style="margin-top:14px;border-top:1px solid var(--grid);padding-top:12px">
+      <button onclick="toggleLook()">Done</button></div>
+  </div>
+
+  <div id="skinPanel" class="form hidden">
+    <h3>Skincare</h3>
+    <div id="skinBox"></div>
+    <div class="bar" style="margin-top:14px;border-top:1px solid var(--grid);padding-top:12px">
+      <button onclick="toggleSkin()">Done</button></div>
+  </div>
+
   <div id="ttPanel" class="form hidden">
-    <h3>This week&rsquo;s classes</h3>
+    <h3>Classes</h3>
     <p style="font-size:12.5px;color:var(--text-secondary);margin:0 0 12px">
-      The bells never move. Tick the slots that actually run this week and name them.
-      Untick one in the middle and it becomes a free period; untick the last ones and school
-      finishes earlier &mdash; the gym, lunch and the whole evening move up with it.</p>
+      Set your <b>normal week</b> once &mdash; every week starts from it. Move to a real week with
+      <b>&rsaquo;</b> and change whatever is different that week; the normal week stays put.
+      The bells never move. Untick a slot in the middle and it becomes a free period; untick the
+      last ones and school finishes earlier, and the gym, lunch and the evening move up with it.</p>
     <div class="bar" id="plHead" style="margin-bottom:10px"></div>
     <div class="plDays" id="plDays"></div>
     <div class="plWhen" id="plWhen"></div>
     <div id="plRows"></div>
+    <div class="sec" style="margin-top:22px;font-size:14px">Sync with school</div>
+    <p class="secnote">Webtop needs no login, but browsers won't let this page read it directly.
+      The Worker in <b>worker.js</b> sits in between — paste its address here once.
+      Cancellations for <b>your</b> teachers are applied to that date only; other classes' changes are ignored.</p>
+    <div id="syncBox"></div>
+    <div class="sec" style="margin-top:18px;font-size:14px">My subjects</div>
+    <p class="secnote">Webtop answers for the whole class, so every stream's group comes back.
+      These are yours — including the מגמות like ביולוגיה and כימיה that aren't tied to class ${'‎'}.
+      Re-pick them whenever you change set or move up a year.</p>
+    <div id="grpBox"></div>
+
+    <div class="sec" style="margin-top:18px;font-size:14px">From school — waiting for you <span class="pbadge" id="propBadge"></span></div>
+    <p class="secnote">Nothing here changes your week until you tap <b>Apply</b>. <b>Not mine</b> dismisses it for
+      good. Webtop's lesson cancellations are exact; the Google-calendar ones are the school's noticeboard,
+      so some of it won't be yours.</p>
+    <div id="propBox"></div>
+    <div class="bar" style="margin-top:8px"><button onclick="undecide()">Bring back everything I dismissed</button></div>
+
     <div class="bar" style="margin-top:14px;border-top:1px solid var(--grid);padding-top:12px">
       <button onclick="toggleTT()">Done</button>
       <span class="spacer"></span>
@@ -354,13 +617,20 @@
   <div id="dayView">
     <div class="now" id="nowCard"></div>
     <div class="free" id="freeBox"></div>
+    <div class="habits" id="habits"></div>
+    <div class="habitOpen" id="habitOpen"></div>
     <div class="stats" id="stats"></div>
+    <div class="wknav" id="wknav"></div>
     <div class="days" id="days"></div>
     <div class="quickday" id="quickday"></div>
     <div class="quickbox">
-      <div class="qlabel">Tap to add to <span id="qday">today</span></div>
-      <div class="chips" id="quick"></div>
-      <div class="bar" style="margin:10px 0 0"><button onclick="toggleForm()" id="bAdd">Something else — full form</button></div>
+      <button class="qhead" onclick="UI.quickOpen=!UI.quickOpen;save();render()">
+        <span>Add something to <span id="qday">today</span></span>
+        <span class="qchev" id="qchev">▾</span></button>
+      <div id="quickWrap">
+        <div class="chips" id="quick"></div>
+        <div class="bar" style="margin:10px 0 0"><button onclick="toggleForm()" id="bAdd">Something else — full form</button></div>
+      </div>
     </div>
     <div id="toast" class="toast hidden"></div>
     <div id="form" class="form hidden">
@@ -368,7 +638,8 @@
 
       <div class="fg">
         <div class="f"><label>Task name</label><input id="fName" placeholder="Dentist, birthday, hand in project…"></div>
-        <div class="f"><label>Date</label><input id="fDate" type="date"></div>
+        <div class="f"><label>Date</label><input id="fDate" type="date">
+          <div class="chips" id="fQuickDate" style="margin-top:6px"></div></div>
       </div>
       <div class="fg">
         <div class="f"><label>Start time</label><input id="fTime" type="time" value="12:00"></div>
@@ -392,9 +663,8 @@
       <button onclick="document.getElementById('fin').click()">Load</button>
       <input type="file" id="fin" accept="application/json" class="hidden" onchange="loadProgress(event)">
     </div>
-    <div class="daysec">All day</div>
-    <div class="list" id="allday"></div>
-    <div class="daysec">Scheduled</div>
+    <!-- All-day habits live in the strip at the top now (#habits), not as cards. -->
+    <div class="daysec" id="schedHead">Scheduled</div>
     <div class="list" id="list"></div>
   </div>
 
@@ -406,12 +676,38 @@
   <div id="tableView" class="hidden"></div>
   <div id="trackView" class="hidden"></div>
 
+  <div id="monthView" class="hidden">
+    <div class="bar" id="moNav" style="margin-bottom:12px"></div>
+    <div class="mogrid" id="moGrid"></div>
+    <p class="secnote" id="moNote" style="margin-top:12px"></p>
+  </div>
+
+  <div id="studyView" class="hidden">
+    <div class="sec" style="margin-top:0">What you need to study</div>
+    <p class="secnote">The study blocks pull from the top of this list, and the minutes you log there
+      come off the topic. Order it so the next thing you should be doing is first.</p>
+    <div class="card" style="margin-bottom:14px">
+      <div class="fg">
+        <div class="f"><label>Subject</label><select id="tSubj" onchange="tSubjLast=this.value"></select></div>
+        <div class="f"><label>What exactly</label><input id="tName" placeholder="טריגונומטריה — תרגילים 1–40"></div>
+        <div class="f"><label>Minutes</label><input id="tMins" type="number" min="5" step="15" value="60"></div>
+      </div>
+      <div class="bar" style="margin:0"><button onclick="addTopic()" style="background:var(--text-primary);color:var(--surface-1);border-color:var(--text-primary);font-weight:560">Add topic</button></div>
+    </div>
+    <div class="tpsum" id="tpSum"></div>
+    <div id="tpList"></div>
+  </div>
+
   <div class="sec">Dated one-offs</div>
   <p class="secnote">From the memory protocol. Tap one to schedule it — the form opens filled in.</p>
   <div class="card"><div class="chips" id="oneoff"></div></div>
 
   <div id="detail" class="hidden"></div>
   <footer id="foot"></footer>
+  <nav class="tabbar" id="tabbar"></nav>
+  <div id="moreSheet" class="hidden"></div>
+  <nav class="tabbar" id="tabbar"></nav>
+  <div id="moreSheet" class="hidden"></div>
 </div>
 <script>// ---------------------------------------------------------------------------
 // Times are minutes from midnight — exact integers, no float drift.
@@ -548,61 +844,136 @@ const VOD = [
 // --- Everyday tasks — subtasks taken from the user's own Structured entries -
 const WAKE   = ['Feet on the floor before you touch the phone','Phone stays face down until you\u2019re outside'];
 const OUTSIDE= ['Bag','Feed dog and bunny','Before school check','Walk the dog','Daylight in your eyes within 20 min of waking \u2014 this is what sets the clock that gets you asleep at 22:30'];
-// --- Skincare -------------------------------------------------------------
-// Derma roller runs SATURDAY night. It blocks actives for 48 h, so:
-//   Sat night  = roll, no actives, GHK-Cu instead
-//   Sun AM/PM  = no actives, GHK-Cu
-//   Mon AM     = no actives (48 h is up at ~21:15 Mon)
-//   Mon night onward = back to normal
-const DERMA_DAY = 6;                       // Saturday
-const recoverAM = i => i === 0 || i === 1; // Sun & Mon mornings
-const recoverPM = i => i === 0;            // Sun night
+// --- Skincare ---------------------------------------------------------------
+// Replaced wholesale on 16 Sep 2026. The old rotation (retinol / salicylic /
+// vitamin C / niacinamide / GHK-Cu on the face) is gone — none of it is merged
+// into this.
+//
+// Two phases. PHASE 1 is barrier repair: five gentle steps, same every night,
+// every active paused. It does NOT expire on its own — it runs until you
+// switch it yourself in Skincare, once moisturizer stops stinging and the
+// redness is mostly gone.
+//
+// PHASE 2 is the real routine, on a weekly rotation:
+//   Mon retinoid · Tue recovery · Wed exfoliating · Thu retinoid
+//   Fri recovery · Sat recovery · Sun recovery
+// with two dials you can turn as your skin settles: Saturday can become a
+// third retinoid night, and Wednesday can drop to recovery.
+//
+// Not face, and not part of any of the above — these ride along at the end of
+// night prep and are unaffected by the phase:
+//   Derma roller  scalp only     Saturday night
+//   GHK-Cu serum  scalp only     Saturday night, straight after rolling
+//   Castor oil    brows & lashes every night
+const DERMA_DAY = 6;                 // Saturday night — scalp, not face
+const GHK_NIGHTS = [DERMA_DAY];      // scalp only, straight after the roller
 
-const faceAM = (i) => recoverAM(i)
-  ? ['1. Light face cleanser',
-     '2. GHK-Cu spray \u2014 in place of the vitamin C while skin is recovering',
-     '3. Niacinamide',
-     '4. Eye cream',
-     '5. Moisturizer',
-     '6. Sunscreen \u2014 non-negotiable this week, freshly rolled skin burns easily',
-     'No vitamin C today \u2014 still inside the 48 h window from Saturday\u2019s roll']
-  : ['1. Light face cleanser',
-     '2. Vitamin C',
-     '3. Niacinamide',
-     '4. Eye cream',
-     '5. Moisturizer',
-     '6. Sunscreen'];
+// Declared here, next to the steps that read it, so there's no order-of-
+// declaration trap: data.js is spliced in ahead of the app code below.
+// load() overwrites these fields from storage; these are the fresh-start values.
+// phase    1 = repair, 2 = normal rotation
+// since    the date that phase started, ISO — drives the day counters
+// retLevel 1 = Mon only · 2 = Mon + Thu (the default) · 3 = Mon + Thu + Sat
+// wedRec   true once breakouts are under control: Wednesday drops to recovery
+let SKIN = { phase:1, since:'2026-09-16', retLevel:2, wedRec:false };
 
-const facePM = (i) => i === DERMA_DAY
-  ? ['1. Light cleanser',
-     '2. Oil-based cleanser',
-     '\u2014 DERMA ROLLER \u2014',
-     'Roll on clean, dry skin. Disinfect the roller before and after.',
-     'Nothing active goes on for 48 h from now \u2014 no acids, no retinol, no vitamin C',
-     '3. GHK-Cu spray \u2014 this is what it\u2019s for. Copper peptides go on straight after rolling.',
-     '4. Heavy moisturizer',
-     '5. Oil',
-     'Frequency depends on needle length \u2014 weekly suits short needles, longer ones want 2\u20134 weeks. Adjust if yours is long.']
-  : recoverPM(i)
-  ? ['1. Light cleanser',
-     '2. Oil-based cleanser',
-     '3. GHK-Cu spray',
-     '4. Eye cream',
-     '5. Heavy moisturizer',
-     '6. Oil',
-     'No salicylic acid, no retinol \u2014 still inside the 48 h window from last night\u2019s roll']
-  : ['1. Light cleanser',
-     '2. Oil-based cleanser',
-     '3. Salicylic acid',
-     '4. Retinol',
-     '5. Retinol eye cream',
-     '6. Heavy moisturizer',
-     '7. Oil']
-     .concat(i === 1 ? ['48 h from Saturday\u2019s roll is up as of about now \u2014 if you rolled late, hold the actives one more night'] : []);
+// The two hard rules, kept here so they can't drift apart from the steps:
+//   Adaferin and PanOxyl never on the same night.
+//   Beauty of Joseon eye serum only on Adaferin nights.
+const RET_DAYS = () => SKIN.retLevel >= 3 ? [1,4,6] : SKIN.retLevel <= 1 ? [1] : [1,4];
+function nightType(i){
+  if (SKIN.phase === 1) return 'repair';
+  if (RET_DAYS().includes(i)) return 'retinoid';
+  if (i === 3 && !SKIN.wedRec)   return 'exfoliate';
+  return 'recovery';
+}
+const NIGHT_LABEL = { repair:'Repair', retinoid:'Retinoid', exfoliate:'Exfoliating', recovery:'Recovery' };
+
+// Phase 2 morning: vitamin C every other morning for the first four weeks,
+// then every morning. Alternating is counted off the day you switched, so it
+// stays put instead of shifting around.
+const daysSince = iso => iso ? Math.floor((Date.now() - new Date(iso + 'T00:00:00').getTime()) / 864e5) : 0;
+function vitCToday(){
+  if (SKIN.phase !== 2) return false;
+  const n = daysSince(SKIN.since);
+  return n >= 28 ? true : n % 2 === 0;
+}
+
+const faceAM = (i) => {
+  if (SKIN.phase === 1) return [
+    '1. Lukewarm water rinse — or a little Vanicream cleanser if you need it',
+    '2. COSRX Hyaluronic Acid essence',
+    '3. COSRX Oil-Free Ultra-Moisturizing Lotion',
+    '4. Babo Botanicals mineral sunscreen stick',
+    'Phase 1. Every active is paused: no vitamin C, no niacinamide, no Adaferin.',
+    'Mildbynature caffeine eye gel is allowed if it doesn’t sting. If it stings, skip it.'];
+  const c = vitCToday();
+  return [
+    '1. Vanicream cleanser, or just water',
+    c ? '2. Timeless vitamin C — today is a vitamin C morning'
+      : '2. No vitamin C this morning — it’s every other morning for the first few weeks',
+    '3. Niacinamide serum — optional',
+    '4. COSRX Oil-Free Ultra-Moisturizing Lotion',
+    '5. Aveeno SPF 60, or the Babo stick. Every day, never skipped.',
+    daysSince(SKIN.since) >= 28
+      ? 'Four weeks in — vitamin C is every morning now.'
+      : `Day ${daysSince(SKIN.since)+1} of phase 2. Vitamin C goes daily at four weeks.`];
+};
+
+const facePM = (i) => {
+  const t = nightType(i);
+  if (t === 'repair') return [
+    '1. From Green cleansing oil — only if you wore sunscreen today',
+    '2. Vanicream gentle facial cleanser',
+    '3. COSRX Hyaluronic Acid essence — on damp skin',
+    '4. COSRX Oil-Free Ultra-Moisturizing Lotion',
+    '5. Thin layer of Vaseline on top',
+    'Phase 1, night ' + (daysSince(SKIN.since)+1) + '. Nothing else goes on your face.',
+    'Paused: Adaferin, Beauty of Joseon eye serum, bakuchiol, PanOxyl, vitamin C, niacinamide.',
+    'Phase 1 ends when you say so — when moisturizer stops stinging and the redness is mostly gone. Tell the app in Skincare.'];
+
+  if (t === 'retinoid') return [
+    '1. From Green cleansing oil — only if you wore sunscreen today',
+    '2. Vanicream gentle facial cleanser',
+    '3. Thin layer of COSRX lotion — this goes on first, it buffers what comes next',
+    '4. Adaferin — pea-sized for the whole face. Avoid the eyes and the corners of your nose.',
+    '5. Beauty of Joseon retinal eye serum — tiny amount, under the eyes',
+    '6. COSRX lotion again, over the top',
+    'No PanOxyl tonight. Adaferin and PanOxyl never share a night.'];
+
+  if (t === 'exfoliate') return [
+    '1. From Green cleansing oil — only if you wore sunscreen today',
+    '2. Vanicream gentle facial cleanser',
+    '3. PanOxyl — T-zone or breakout spots only, not the whole face',
+    '4. COSRX Hyaluronic Acid essence, then COSRX lotion',
+    'No Adaferin tonight, and no eye serum — that’s Adaferin nights only.',
+    'Once your breakouts are under control, tell the app and Wednesday becomes a recovery night.'];
+
+  return [
+    '1. From Green cleansing oil — only if you wore sunscreen today',
+    '2. Vanicream gentle facial cleanser',
+    '3. COSRX Hyaluronic Acid essence',
+    '4. COSRX Oil-Free Ultra-Moisturizing Lotion',
+    '5. Vaseline on any dry spots',
+    'No actives tonight. No eye serum either — that’s Adaferin nights only.'];
+};
+
+// Scalp, brows and lashes. Deliberately separate from the face block: these
+// are not affected by the phase, and nothing here ever goes on your face.
+const nonFacePM = (i) => {
+  const out = ['— SCALP & BROWS (not face) —'];
+  if (i === DERMA_DAY){
+    out.push('Derma roller — scalp only. Clean, dry scalp; disinfect the roller before and after.');
+    if (GHK_NIGHTS.includes(i))
+      out.push('GHK-Cu serum — scalp only, straight after rolling. This is what it’s for.');
+  }
+  out.push('Castor oil — brows and lashes only. Clean spoolie, tiny amount.');
+  return out;
+};
 
 const showerAM = (i) => ['Soap everywhere but face and hair','Shave','\u2014 FACE \u2014', ...faceAM(i)];
 
-const CLOTHES= ['The clothes you laid out last night','Deodorant','Cologne'];
+const CLOTHES= ['The clothes you laid out last night','Belt on and pants pulled up properly — they fall all day otherwise','Deodorant','Cologne'];
 const HAIR   = ['Dry','Product','Style'];
 const BFAST  = ['Feed dog and bunny, fresh water','Eat \u2014 protein first','Supplements with the food (the iHerb order) \u2014 they absorb better with a meal, and this is the one moment every day you\u2019re guaranteed to be eating','Vitamin D and calcium especially \u2014 your surgery prep sheet flags both for bone healing','Log it in Cronometer \u2014 https://cronometer.com/#diary'];
 const TEETH  = ['Brush 2 min','Floss','Tongue'];
@@ -621,15 +992,20 @@ const WATER  = ['Glass 1','Glass 2','Glass 3','Glass 4','Glass 5','Glass 6'];
 const SHAMPOO = ['nothing','clarifying shampoo','shampoo','nothing','shampoo','nothing','hair mask'];
 const nightPrep = (i) => [
   'Pill / melatonin FIRST \u2014 everything else waits',
+  'Neti pot water ON now \u2014 it needs the whole block to come down to body temperature',
+  'Use distilled, or tap water boiled for a minute and cooled. Never straight from the tap.',
   'Shot',
   'Brush teeth',
   'Do the backpack for tomorrow',
   '\u2014 SHOWER \u2014',
   `Hair today (day ${i+1} of 7): ${SHAMPOO[i]}`,
   'Soap everywhere but face and hair',
-  '\u2014 FACE \u2014',
+  `\u2014 FACE \u2014 ${NIGHT_LABEL[nightType(i)]} night`,
   ...facePM(i),
+  ...nonFacePM(i),
   '\u2014 THEN \u2014',
+  'Neti pot \u2014 the water you started at the top of this block should be lukewarm by now',
+  'Lean over the sink, head tilted, breathe through your mouth. Blow out gently afterwards.',
   'Lips',
   'Eye patch',
   'Neck curls',
@@ -646,19 +1022,35 @@ const SLEEPPREP = [
   'Water by the bed',
   'Asleep by 22:30. The protocol says this one outweighs everything else in it combined.',
 ];
+
+// --- Neck training: three sessions a week, one direction each --------------
+const NECK_PLAN = {
+  0: {n:'sides',  sub:[
+    'Lateral neck raise, lying on your side — 3 × 12–15 each side, slow',
+    'Hold the top for a second. No bouncing, no jerking into range.',
+    'Isometric side hold — palm against the temple, press 10 s × 3 each side',
+    'Shrugs are not neck sides. Keep the shoulders down and out of it.']},
+  2: {n:'back',   sub:[
+    'Neck extension, face down off a bench — 3 × 12–15',
+    'Start bodyweight only. Add load with a towel-and-plate on the back of the head, not a harness, until you have months of this behind you.',
+    'Isometric extension — hands behind the head, press back 10 s × 3',
+    'Chin tucks, 2 × 15 — this is the one that fixes the posture you sit in all day at school']},
+  4: {n:'front',  sub:[
+    'Neck flexion, face up off a bench — 3 × 12–15, chin tucked first',
+    'Chin to chest, not chin forward. Forward is how people hurt themselves.',
+    'Isometric flexion — palm on the forehead, press 10 s × 3',
+    'Stop the set the moment form breaks. The neck gives you no warning.']},
+};
+const NECK_DAYS = Object.keys(NECK_PLAN).map(Number);
+const neckTask = (t, i) => ({t, d:10, n:`Neck — ${NECK_PLAN[i].n}`, c:'train',
+  note:'Two days between sessions. Light and controlled beats heavy and fast, every time, on a neck.',
+  sub:NECK_PLAN[i].sub});
+
 const RESTOCK = ['Anything that ran out today','Anything running low','Add it to the list for Thursday’s shop'];
 const EVENTS  = ['Anything coming up you haven’t sorted?','Birthdays, tests, trips, appointments','Put it in as a one-off task now, not later'];
 const EVENING_ADMIN = t => [
   {t, d:10, n:'Restock', c:'meal', sub:RESTOCK},
   {t:t+15, d:5, n:'Events to plan', c:'meal', sub:EVENTS},
-];
-const ERRANDS = (start) => [
-  {t:start, d:90, n:'Groceries + iHerb', c:'meal',
-   note:'Was Monday. Moved here because Thursday is your rest day — no gym to work around.', sub:SHOP},
-  {t:start+105, d:60, n:'Meal prep', c:'meal',
-   note:'Your old "Make food" and "Make food preps", in one block.', sub:MEALPREP},
-  {t:start+180, d:45, n:'Weekly review', c:'meal',
-   note:'Your "For the week" block, with your own list.', sub:WEEKREVIEW},
 ];
 const CLEAN = ['Desk','Floor','Laundry out','Bin','Change the sheets','Bathroom shelf — bin what’s empty'];
 const MEALPREP = ['Cook the week\u2019s protein in bulk','Portion into containers','Prep vegetables and carbs','Label, fridge and freeze','Protein, calcium and vitamin D matter here \u2014 your surgery prep sheet flags all three for bone healing'];
@@ -666,6 +1058,30 @@ const SHOP = ['Osher Ad \u2014 work from the list you made in the weekly review'
 const WEEKREVIEW = ['Restock — the full list for the shop','Make tasks','Events to plan — anything coming up?',
   'Haircut','Doctor','School shit','Friend shit','Dog and bunny','Clean room'];
 const SCHEDREVIEW = ['Anything that didn\u2019t happen twice this week \u2014 change the time or delete it. Don\u2019t re-create it.','Anything you did that isn\u2019t on here \u2014 add it.','15 min. This is the block that stops 159 duplicates happening again.'];
+
+// The three errands, in the order they get dropped when the day is too short.
+const ERRAND_LIST = [
+  {d:90, n:'Groceries + iHerb', c:'meal',
+   note:'Thursday is your rest day — no gym to work around.', sub:SHOP},
+  {d:60, n:'Meal prep', c:'meal',
+   note:'Your old "Make food" and "Make food preps", in one block.', sub:MEALPREP},
+  {d:45, n:'Weekly review', c:'meal',
+   note:'Your "For the week" block, with your own list.', sub:WEEKREVIEW},
+];
+// Fit what the room allows, in order; return the blocks and what didn't fit.
+function errandsFor(start, room){
+  const blocks = [], spill = [];
+  let t = start;
+  ERRAND_LIST.forEach(e => {
+    if (t + e.d <= start + room){ blocks.push({...e, t}); t += e.d + 15; }
+    else spill.push(e);
+  });
+  if (spill.length && blocks.length)
+    blocks[blocks.length-1] = {...blocks[blocks.length-1],
+      note: blocks[blocks.length-1].note + ' ' + spill.map(x=>x.n).join(' and ') + ' moved to Friday — school ran too long today.'};
+  return {blocks, spill, end: t};
+}
+const ERRANDS = start => errandsFor(start, 9999).blocks;
 
 const MORNING_STEPS = (i) => [
   {t:390,d:1, n:'Wake up',c:'morning',sub:WAKE},
@@ -772,6 +1188,13 @@ function mtFor(b){
   return null;
 }
 
+// Short names for the compact habit strip. Long ones don't fit a phone.
+const ALLDAY_SHORT = {
+  'Encoding habits':'Encoding', '3 implementation intentions':'Intentions',
+  'Eyes, spine & breathing':'Eyes & spine', 'Screens & sleep':'Screens',
+  '15,000 steps':'Steps', 'Drink water':'Water', 'Don’t bite nails':'Nails',
+  'Minimap cadence (gaming days)':'Minimap',
+};
 const ALLDAY = [
   {n:'Encoding habits',sub:[
     'The 3-second rule — when you set something down, hear something you’ll need, or meet someone: stop, three seconds of undivided attention, say it out loud. "Keys, kitchen counter, left of the bowl."',
@@ -869,31 +1292,37 @@ function freeDay(i, key, memSub){
   const a = run(key ? gym.end+5 : 780, [B(30,'Lunch','meal',{sub:LUNCH})]);
   const errands = key ? [] : ERRANDS(840);
   return [...MORNING(i),
-    {t:480,d:60,n:'Study',c:'study',q:{label:'min focused',target:60},note:'One hour. Rotation across the subjects you’re behind on.',sub:STUDY_AM},
+    {t:480,d:90,n:'Study',c:'study',q:{label:'min focused',target:90},topic:true,note:'A day with no school — 90 min, from the top of your topic list.',sub:STUDY_AM},
     {t:545,d:25,n:'Memory training',c:'study',note:'Memory & Awareness Protocol — Phase 1.',sub:memSub},
     {t:575,d:15,n:'Duolingo',c:'study',q:{label:'min',target:15},sub:DUO},
     {t:595,d:15,n:'Aim training',c:'study',q:{label:'min',target:15},sub:AIM},
-    ...gym.blocks, ...a.blocks, ...errands, ...EVENING_ADMIN(1170),
+    ...gym.blocks, ...a.blocks, ...errands,
+    ...(NECK_DAYS.includes(i) ? [neckTask(1155, i)] : []),
+    ...EVENING_ADMIN(1170),
     {t:1200,d:20,n:'Dinner',c:'meal',sub:DINNER}, ...night(i)];
 }
-const FRIDAY = (() => {
-  const gym = gymRun(630,'G5',CARDIO_DAYS.includes(5));
+const makeFriday = (spill=[]) => {
+  const gym = gymRun(660,'G5',CARDIO_DAYS.includes(5));
   const a = run(gym.end+10,[B(30,'Lunch','meal',{sub:LUNCH})]);
+  let t = a.end + 15;
+  const extra = spill.map(e => { const b = {...e, t,
+    note:(e.note||'') + ' Moved off Thursday — school ran long there.'}; t += e.d + 15; return b; });
   return [...MORNING(5),
-    {t:480,d:60,n:'Study',c:'study',q:{label:'min focused',target:60},note:'One hour. Rotation across the subjects you’re behind on.',sub:STUDY_AM},
-    {t:545,d:25,n:'Memory training',c:'study',sub:MEM_TF},
-    {t:575,d:15,n:'Duolingo',c:'study',q:{label:'min',target:15},sub:DUO},
-    {t:595,d:15,n:'Aim training',c:'study',q:{label:'min',target:15},sub:AIM},
-    ...gym.blocks, ...a.blocks,
-    ...EVENING_ADMIN(1000),
+    {t:480,d:90,n:'Study',c:'study',q:{label:'min focused',target:90},topic:true,note:'No school — 90 min from the top of your topic list.',sub:STUDY_AM},
+    {t:575,d:25,n:'Memory training',c:'study',sub:MEM_TF},
+    {t:605,d:15,n:'Duolingo',c:'study',q:{label:'min',target:15},sub:DUO},
+    {t:625,d:15,n:'Aim training',c:'study',q:{label:'min',target:15},sub:AIM},
+    ...gym.blocks, ...a.blocks, ...extra,
+    ...EVENING_ADMIN(Math.max(1000, t)),
     {t:1080,d:185,n:'Kidush',c:'people',sub:KIDUSH}, ...night(5)];
-})();
+};
+const FRIDAY = makeFriday();
 const SATURDAY = [...SAT_MORNING,
   {t:570,d:30,n:'Pause-and-predict VOD',c:'study',note:'Weekly. The highest-value drill in the protocol.',sub:VOD},
   {t:605,d:25,n:'Memory training',c:'study',sub:MEM_BASE},
-  {t:640,d:60,n:'Study',c:'study',q:{label:'min focused',target:60},sub:STUDY_AM},
-  {t:705,d:15,n:'Duolingo',c:'study',q:{label:'min',target:15},sub:DUO},
-  {t:725,d:15,n:'Aim training',c:'study',q:{label:'min',target:15},sub:AIM},
+  {t:640,d:90,n:'Study',c:'study',q:{label:'min focused',target:90},topic:true,sub:STUDY_AM},
+  {t:735,d:15,n:'Duolingo',c:'study',q:{label:'min',target:15},sub:DUO},
+  {t:755,d:15,n:'Aim training',c:'study',q:{label:'min',target:15},sub:AIM},
   {t:780,d:30,n:'Lunch',c:'meal',sub:LUNCH},
   ...gymRun(840,'G6',false).blocks,
   {t:990,d:60,n:'Clean',c:'meal',note:'Your Saturday 15:00 clean, from the old schedule.',sub:CLEAN},
@@ -925,7 +1354,8 @@ function periodsFor(pl){
       if (b.t > end){ const g = b.t - end;
         out.push({t:end, d:g, brk:true, free:g >= 40,
           label: g >= 40 ? 'Free period' : g >= 20 ? 'Long break' : 'Break'}); } }
-    out.push({t:b.t, d:b.d, p:b.p, label: pl[b.p] ? `${b.lab} · ${pl[b.p]}` : b.lab});
+    out.push({t:b.t, d:b.d, p:b.p, subj:pl[b.p]||'',
+      label: pl[b.p] ? `${b.lab} · ${pl[b.p]}` : b.lab});
   });
   return out;
 }
@@ -936,19 +1366,20 @@ const CLASSSUB = ['Write down any homework the moment it’s set','3-second rule
 const HOMECHG  = ['Drop the bag','Gym kit on','Eat something small — you’re training before lunch',
                   'Pull today’s session up on your phone before you leave'];
 
+let spilledErrands = [];   // errands a long Thursday pushed onto Friday
 function schoolDay(i, key, memSub, per){
   const blocks = [...MORNING(i)];
   const S = per[0].t, E = per[per.length-1].t + per[per.length-1].d;
   const leave = S - 5, gap = leave - 455;
   if (gap >= 20){
     const d = Math.min(gap, 60);
-    blocks.push({t:455, d, n:'Study', c:'study', q:{label:'min focused',target:d},
+    blocks.push({t:455, d, n:'Study', c:'study', q:{label:'min focused',target:d}, topic:true,
       note:`No morning class today — ${d} min in your strongest window, before you leave.`, sub:STUDY_AM});
   }
   blocks.push({t:leave, d:5, n:'Bag + walk to school', c:'people', sub:BAGGO});
   per.forEach(p => blocks.push(p.brk
     ? {t:p.t, d:p.d, n:p.label, c:'people', brk:true, free:p.free, sub:(p.free?FREESUB:BRKSUB)}
-    : {t:p.t, d:p.d, n:p.label, c:'people', period:p.p, sub:CLASSSUB}));
+    : {t:p.t, d:p.d, n:p.label, c:'people', period:p.p, subj:p.subj, sub:CLASSSUB}));
 
   // Gym before lunch — everything after school keys off when the last class ends.
   let t = E;
@@ -967,15 +1398,26 @@ function schoolDay(i, key, memSub, per){
   const a = run(t, [B(30,'Lunch','meal',{sub:LUNCH})]);
   blocks.push(...a.blocks);
   t = a.end + 10;
-  if (!key){ const er = ERRANDS(t); blocks.push(...er); t = er[er.length-1].t + er[er.length-1].d + 10; }
+  if (!key){
+    // everything after the errands still has to fit before Night prep at 21:15
+    const eveNeed = 155 + (NECK_DAYS.includes(i) ? 10 : 0);
+    const er = errandsFor(t, Math.max(0, 1275 - eveNeed - t));
+    blocks.push(...er.blocks);
+    spilledErrands = er.spill;
+    t = er.blocks.length ? er.end : t;
+  }
 
   const eve = [
+    ...(NECK_DAYS.includes(i) ? [B(10,`Neck — ${NECK_PLAN[i].n}`,'train',
+        {note:'Two days between sessions. Light and controlled beats heavy and fast, every time, on a neck.',sub:NECK_PLAN[i].sub})] : []),
     B(15,'Aim training','study',{q:{label:'min',target:15},sub:AIM}),
-    B(25,'Study — retrieval','study',{q:{label:'min',target:25},note:'Second pass on this morning’s subject.',sub:STUDY_PM}),
+    B(55,'Study — retrieval','study',{q:{label:'min',target:55},topic:true,note:'Second pass, plus the extra half hour you asked for.',sub:STUDY_PM}),
     B(25,'Memory training','study',{sub:memSub}),
     B(15,'Duolingo','study',{q:{label:'min',target:15},sub:DUO}),
   ];
-  if (key && CARDIO_DAYS.includes(i) && long)
+  // Evening cardio only if the night still lands on time. Sleep wins over a third cardio.
+  const evePlain = eve.reduce((a,b)=>a+b.d,0) + eve.length*5 + 155;
+  if (key && CARDIO_DAYS.includes(i) && long && t + evePlain + 30 <= 1265)
     eve.push(B(30,'Zone 2 cardio','train',{q:{label:'min',target:30},
       note:'Moved to the evening — school ran to '+fmtM(E)+', so it wouldn’t fit before lunch.',sub:CARDIO}));
   eve.push(B(10,'Restock','meal',{sub:RESTOCK}), B(5,'Events to plan','meal',{sub:EVENTS}),
@@ -991,12 +1433,201 @@ const fmtM = m => String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padS
 function buildWeek(plan){
   const roster = [['G1',MEM_BASE],['G2',MEM_MW],['G3',MEM_TF],['G4',MEM_MW],[null,MEM_BASE]];
   const out = [];
+  spilledErrands = [];
   for (let i=0;i<5;i++){
     const per = periodsFor(plan && plan[i]);
     out.push(per.length ? schoolDay(i, roster[i][0], roster[i][1], per)
                         : freeDay(i, roster[i][0], roster[i][1]));
   }
-  out.push(FRIDAY); out.push(SATURDAY);
+  out.push(makeFriday(spilledErrands)); out.push(SATURDAY);
+  return out;
+}
+
+
+// --- Your real timetable, read off the Webtop screenshots ------------------
+// This is only the DEFAULT for the normal week; everything stays editable.
+const DEFAULT_BASE = {
+  0: {M:'מתמטיקה 5', 1:'מתמטיקה 5', 2:'מתמטיקה 5', 3:'השכלה כללית', 4:'השכלה כללית', 5:'תנ״ך'},
+  1: {1:'חינוך גופני', 2:'ביולוגיה מבוא', 3:'לשון', 4:'לשון', 5:'אנגלית 4', 6:'אנגלית 4', 7:'חינוך תעבורתי', 8:'דיאלוג'},
+  2: {1:'היסטוריה', 2:'היסטוריה', 3:'תנ״ך', 4:'תנ״ך', 5:'חינוך וחברה'},
+  3: {M:'מתמטיקה 5', 1:'מתמטיקה 5', 2:'מתמטיקה 5', 3:'אנגלית 4', 4:'אנגלית 4', 5:'ביולוגיה מבוא', 6:'כימיה 5', 7:'כימיה 5', 8:'כימיה 5'},
+  4: {1:'היסטוריה', 2:'חינוך גופני', 3:'מתמטיקה 5', 4:'מתמטיקה 5', 5:'אזרחות', 6:'לשון', 7:'הנדסת תוכנה 5', 8:'הנדסת תוכנה 5'},
+};
+// Your subjects, for the study topic picker. Bagrut-weighted ones first.
+const SUBJECTS = ['מתמטיקה 5','כימיה 5','הנדסת תוכנה 5','אנגלית 4','לשון','היסטוריה','תנ״ך','אזרחות',
+                  'ביולוגיה מבוא','השכלה כללית','חינוך וחברה','דיאלוג','אחר'];
+
+
+// --- School sync -----------------------------------------------------------
+// Nothing here is hardcoded to a year. Your grade, your class and your study
+// groups are all settings, because all three change every September.
+const GRADES = {
+  10: { token:'י',  alt:['יוד'], cal:'u7mfbgh1a2656tutro7shq00is@group.calendar.google.com', calName:'שכבת יוד' },
+  11: { token:'יא', alt:[],      cal:'5auat3t6o5epmf4c3c298mvobo@group.calendar.google.com', calName:'שכבת יא' },
+  12: { token:'יב', alt:[],      cal:'7rqcrqcsq5to3609gbc222n7vc@group.calendar.google.com', calName:'שכבת יב' },
+};
+// Your groups, by studyGroupID. Seeded from this year's feed; re-pick them in
+// Classes -> My subjects whenever the timetable changes under you.
+const DEFAULT_GROUPS = {
+  3374:'מתמטיקה 5', 2585:'כימיה 5', 1015:'אנגלית 4', 3411:'לשון',
+  3469:'היסטוריה', 2206:'תנ״ך', 2925:'אזרחות', 129:'ביולוגיה מבוא', 2423:'השכלה כללית',
+  1932:'חינוך גופני', 2713:'חינוך וחברה', 1054:'דיאלוג', 622:'חינוך תעבורתי',
+};
+// Sept 2026: you left ביולוגיה 5 (group 3403) for הנדסת תוכנה. Its studyGroupID is
+// NOT guessed here — a wrong ID silently mis-matches every cancellation and room
+// change. It comes from the live feed, and WANT_GROUP is what asks you to tick it.
+const DROPPED_GROUPS = { 3403:'ביולוגיה 5' };
+const WANT_GROUP = /הנדסת\s*תוכנה|מדעי\s*המחשב|מחשבים|תכנות/;
+const cleanRoom = r => String(r||'').replace(/\s*\^\s*$/,'').trim();
+// Webtop dayIndex 1..6 = Sunday..Friday; hour 0 is the 07:45 morning class.
+const SLOT_OF_HOUR = h => h === 0 ? 'M' : String(h);
+const WD_OF_DAYINDEX = di => di - 1;
+
+// Every group the school runs for your class, so you can pick yours.
+function allGroupsFrom(schedule){
+  const map = new Map();
+  (schedule||[]).forEach(d => (d.hoursData||[]).forEach(h => (h.scheduale||[]).forEach(l => {
+    if (l.studyGroupID == null) return;
+    const id = Number(l.studyGroupID);
+    if (!map.has(id)) map.set(id, {
+      id, subject:String(l.subject||'').replace(/``/g,'״'),
+      level:String(l.subjectLevel||'').replace(/``/g,'״'),
+      teacher:[l.teacherLastName, l.teacherPrivateName].filter(Boolean).join(' '),
+      room:cleanRoom(l.room), n:0 });
+    map.get(id).n++;
+  })));
+  return [...map.values()].sort((a,b)=> a.subject===b.subject ? b.n-a.n : (a.subject<b.subject?-1:1));
+}
+// All of these take YOUR groups as an argument — nothing is baked in.
+const inGroups = (G, id) => id != null && Object.prototype.hasOwnProperty.call(G, Number(id));
+
+function myWeekFrom(schedule, G){
+  const week = {}, rooms = {};
+  (schedule||[]).forEach(d => {
+    const wd = WD_OF_DAYINDEX(d.dayIndex);
+    if (wd < 0 || wd > 6) return;
+    const day = {}, rm = {};
+    (d.hoursData||[]).forEach(h => {
+      const mine = (h.scheduale||[]).find(x => inGroups(G, x.studyGroupID));
+      if (mine && h.hour <= 8){
+        day[SLOT_OF_HOUR(h.hour)] = G[Number(mine.studyGroupID)];
+        if (mine.room) rm[SLOT_OF_HOUR(h.hour)] = cleanRoom(mine.room);
+      }
+    });
+    if (Object.keys(day).length){ week[wd] = day; rooms[wd] = rm; }
+  });
+  week.__rooms = rooms;
+  return week;
+}
+function myChangesFrom(schedule, G){
+  const out = [];
+  (schedule||[]).forEach(d => (d.hoursData||[]).forEach(h =>
+    (h.scheduale||[]).forEach(les => (les.changes||[]).forEach(c => {
+      const gid = c.studyGroupID != null ? c.studyGroupID : les.studyGroupID;
+      if (!inGroups(G, gid)) return;
+      out.push({ ...c, subject:G[Number(gid)],
+        hour: c.hour != null ? c.hour : h.hour,
+        hourName: h.hourName,
+        content: c.definition || c.content || c.type || 'change' });
+    }))));
+  return out;
+}
+// A day the school has actually closed: every one of your lessons cancelled.
+function closedDays(schedule, G){
+  const out = [];
+  (schedule||[]).forEach(d => {
+    let n = 0, canc = 0, date = null;
+    (d.hoursData||[]).forEach(h => (h.scheduale||[]).forEach(l => {
+      if (!inGroups(G, l.studyGroupID)) return;
+      n++;
+      const c = (l.changes||[]).find(x => x.isClassCancel || x.fillUpType === 'cancel');
+      if (c){ canc++; date = date || String(c.date||'').slice(0,10); }
+    }));
+    if (n >= 3 && canc === n && date) out.push({date, lessons:n});
+  });
+  return out;
+}
+
+// --- The school's Google calendars -----------------------------------------
+const SCHOOL_CAL = { cid:'8dfcii2tm2fla83vtv220hvrf4@group.calendar.google.com',
+                     name:'School calendar', holidays:true };
+const HOLIDAY_CAL = { cid:'iw.jewish#holiday@group.v.calendar.google.com',
+                      name:'Israeli holidays', hint:true };
+// NB: no \b anywhere — JavaScript word boundaries are Latin-only and never
+// match beside a Hebrew letter. This bit me once already on day names.
+const isHoliday = sum => /(^|\s)חופש[התי]/.test(String(sum||''));
+const STAFF = /מליאת|רכזי מקצוע|ישיבת צוות|חדר מורים|השתלמות|ישיבת הנהלה/;
+// Is this event yours? Decided from YOUR grade, YOUR class and YOUR subjects,
+// so it keeps working when you move up a year.
+function makeEventFilter(grade, classNo, myGroups){
+  const g = GRADES[grade] || GRADES[10];
+  const myTokens  = [g.token, ...(g.alt||[])];
+  const otherY    = Object.entries(GRADES).filter(([k]) => +k !== +grade).map(([,v]) => v.token);
+  const myClass   = g.token + classNo;
+  const mySubjects = [...new Set(Object.values(myGroups||{}).map(x => String(x).split(' ')[0]))].filter(Boolean);
+  return function(sum){
+    const s = String(sum||'');
+    if (STAFF.test(s)) return false;
+    // "יא - פיזיקה בוחן" — another year says so up front
+    if (otherY.some(t => new RegExp('(^|[^\u0590-\u05FF])' + t + '\\s*[-–]').test(s))) return false;
+    // named classes: mine only if I'm one of them
+    const classes = s.match(/י[אב]?\d{1,2}/g) || [];
+    if (classes.length) return classes.includes(myClass);
+    // A whole-word test that works in Hebrew. \b is useless here, and the
+    // grade-10 token is the single letter י, which hides inside most words.
+    if (myTokens.some(t => new RegExp('(^|[^\u0590-\u05FF])' + t + '([^\u0590-\u05FF]|$)').test(s))) return true;
+    // a subject that isn't one of mine, named on its own -> someone else's מגמה
+    const subj = s.match(/[֐-׿]{3,}/g) || [];
+    if (subj.length && mySubjects.length){
+      const hitsMine  = subj.some(w => mySubjects.some(m => m.includes(w) || w.includes(m)));
+      const looksLikeSubject = /מבחן|בוחן|מתכונת|בגרות|שיעור/.test(s);
+      if (looksLikeSubject && !hitsMine) return false;
+    }
+    return true;   // no class named at all -> whole school, so yours too
+  };
+}
+// A deliberately small iCalendar reader: enough for DTSTART, SUMMARY, UID.
+function parseICS(text){
+  const out = [];
+  String(text).replace(/\r\n[ \t]/g, '').split('BEGIN:VEVENT').slice(1).forEach(block => {
+    const f = k => { const m = block.match(new RegExp('^' + k + '[^:\\n]*:(.*)$', 'm')); return m ? m[1].trim() : ''; };
+    const raw = f('DTSTART'); if (!raw) return;
+    const d = raw.slice(0,8);
+    if (!/^\d{8}$/.test(d)) return;
+    const time = /T(\d{2})(\d{2})/.exec(raw);
+    const date = `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}`;
+    // DTEND matters. Google sends a run like 25 Sep - 3 Oct as ONE event with
+    // DTSTART 20260925 and DTEND 20261004 — the end date is EXCLUSIVE on an
+    // all-day event. Reading only DTSTART made a nine-day school closure look
+    // like a single day off, which is how Sukkot went missing.
+    let end = date;
+    const rawEnd = f('DTEND'), de = rawEnd.slice(0,8);
+    if (/^\d{8}$/.test(de)){
+      const d2 = new Date(`${de.slice(0,4)}-${de.slice(4,6)}-${de.slice(6,8)}T12:00:00`);
+      if (!time) d2.setDate(d2.getDate() - 1);         // exclusive -> inclusive
+      const e2 = iso(d2);
+      if (e2 > end) end = e2;
+    }
+    out.push({ date, end,
+               min: time ? (+time[1])*60 + (+time[2]) : null,
+               allDay: !time,
+               summary: f('SUMMARY').replace(/\\,/g,',').replace(/\\n/g,' ').trim(),
+               uid: f('UID') });
+  });
+  return out;
+}
+
+// Every date an event covers, first to last. Capped so a year-long entry in
+// the school calendar can't spray hundreds of proposals at you.
+const CAL_MAX_SPAN = 60;
+function datesOf(e){
+  const out = [], d = new Date(e.date + 'T12:00:00'), last = e.end || e.date;
+  for (let i = 0; i < CAL_MAX_SPAN; i++){
+    const s = iso(d);
+    out.push(s);
+    if (s >= last) break;
+    d.setDate(d.getDate() + 1);
+  }
   return out;
 }
 
@@ -1042,19 +1673,42 @@ const T0=360, T1=1410, PXH=52, PXM=PXH/60;
 const DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const nowDate  = () => new Date();
 const nowMin   = () => { const d=nowDate(); return d.getHours()*60 + d.getMinutes(); };
-const todayIdx = () => nowDate().getDay();
+const realToday = () => nowDate().getDay();
+const todayIdx  = () => wkOff===0 ? nowDate().getDay() : -1;
 const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const weekStart = () => { const d=nowDate(); d.setDate(d.getDate()-d.getDay()); d.setHours(0,0,0,0); return d; };
+const thisSunday = () => { const d=nowDate(); d.setDate(d.getDate()-d.getDay()); d.setHours(0,0,0,0); return d; };
+const weekStart  = () => { const d=thisSunday(); d.setDate(d.getDate()+wkOff*7); return d; };
 const dateFor = i => { const d=weekStart(); d.setDate(d.getDate()+i); return iso(d); };
 const dayNum  = i => { const d=weekStart(); d.setDate(d.getDate()+i); return d.getDate(); };
 
 const mode = 'school';
+let wkOff = 0;            // which week the day/week views show, 0 = this one
+let UI = { theme:'auto', accent:'orange', density:'normal', anim:true, freeInfo:false, quickOpen:false };
+const ACCENTS = {
+  orange:{n:'Orange', v:'#eb6834'}, blue:{n:'Blue', v:'#2a78d6'}, green:{n:'Green', v:'#12a05f'},
+  violet:{n:'Violet', v:'#7c5cd6'}, pink:{n:'Pink', v:'#d6437f'}, slate:{n:'Slate', v:'#5a6b7d'},
+};
+// One place to ask "are we on a phone?" — must match the CSS breakpoint below.
+const onPhone = () => window.matchMedia('(max-width:759px)').matches;
+function applyUI(){
+  const r = document.documentElement;
+  r.setAttribute('data-density', UI.density);
+  r.setAttribute('data-anim', UI.anim ? 'on' : 'off');
+  if (UI.theme === 'auto') r.removeAttribute('data-theme');
+  else r.setAttribute('data-theme', UI.theme);
+  r.style.setProperty('--accent', (ACCENTS[UI.accent]||ACCENTS.orange).v);
+}
+function setUI(k, v){ UI[k] = v; applyUI(); save(); renderLook(); render(); }
 let view='day', day = todayIdx(), open=null, fcat='people';
 let done={}, amounts={}, hist={}, extras=[];
 let PATCH = {weekly:{}, daily:{}};   // edits layered over the built-in schedule
 let ADDED = [];                      // tasks you added that repeat weekly
 let editing = null, editCat = 'study', editScope = 'week';
-let WEEK = {};            // WEEK[sundayISO][weekday][slot] = subject — a fresh set every week
+let BASE = JSON.parse(JSON.stringify(DEFAULT_BASE));   // your normal week
+let TOPICS = [];          // study backlog: {id, subj, n, mins, done}
+let ROOMS = {};           // ROOMS[weekday][slot] = "ח י8" — the wing matters, not the number
+let ROOMOVR = {};         // ROOMOVR["2026-09-16|3"] = "מח 5" — a one-date room change
+let WEEK = {};            // WEEK[sundayISO][weekday] = a one-week override of that day
 let WEEKDAYS = buildWeek(null);   // the seven days as currently planned
 let MTO = {};             // MTO[task name] = {k:'ears'|'eyes'|'body'|'micro'|'none', m:minutes}
 let editMt = null, formMt = null;                   // the multitask picker's state
@@ -1076,7 +1730,7 @@ const kW = (m,wd,n) => `${m}|${wd}|${n}`;
 const kD = (isoD,n)  => `${isoD}|${n}`;
 function dayTasks(d){
   const isoD = dateFor(d);
-  const base = [...data()[d], ...ADDED.filter(a=>a.mode===mode && a.wd===d)];
+  const base = [...data()[d], ...ADDED.filter(a=>a.mode===mode && a.wd===d).map(a=>({...a, added:true}))];
   const out = [];
   base.forEach(b=>{
     const w = PATCH.weekly[kW(mode,d,b.n)];
@@ -1098,19 +1752,30 @@ const realSteps= b => stepsOf(b).filter(s=>!isHdr(s));
 
 /* ---------- persistence (silently no-ops where storage is blocked) ---------- */
 const KEY='mySchedule.v2';   // v2 = the weekly-classes rebuild; v1 data is deliberately not read
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify({done,amounts,hist,extras,WEEK,PATCH,ADDED,MTO})); }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify({done,amounts,hist,extras,BASE,WEEK,PATCH,ADDED,MTO,TOPICS,TLOG,SYNC,ROOMS,ROOMOVR,UI,SKIN})); }catch(e){} }
 function load(){
   try{
     localStorage.removeItem('mySchedule.v1');   // the old summer-term save — deliberately discarded
     const raw = localStorage.getItem(KEY); if(!raw) return;
     const o = JSON.parse(raw);
     done = o.done||{}; amounts = o.amounts||{}; extras = o.extras||[];
+    if (o.BASE) BASE = o.BASE;
+    if (o.TOPICS) TOPICS = o.TOPICS;
+    if (o.TLOG) TLOG = o.TLOG;
+    if (o.ROOMS) ROOMS = o.ROOMS;
+    if (o.ROOMOVR) ROOMOVR = o.ROOMOVR;
+    if (o.UI) UI = {...UI, ...o.UI};
+    if (o.SKIN) SKIN = {...SKIN, ...o.SKIN};
+    if (o.SYNC){ SYNC = {...SYNC, ...o.SYNC, seen:(o.SYNC.seen||{})};
+      if (o.SYNC.cls && !o.SYNC.grade){ const m=/^(\d+)\|(\d+)$/.exec(o.SYNC.cls);
+        if (m){ SYNC.grade=+m[1]; SYNC.classNo=+m[2]; } }
+      if (!SYNC.groups || !Object.keys(SYNC.groups).length) SYNC.groups = {...DEFAULT_GROUPS}; }
+    migrateGroups();
     if (o.WEEK) WEEK = o.WEEK;
     if (o.PATCH) PATCH = o.PATCH;
     if (o.ADDED) ADDED = o.ADDED;
     if (o.MTO){ MTO = o.MTO;
       Object.values(MTO).forEach(v=>{ if (MT_MIGRATE[v.k]) v.k = MT_MIGRATE[v.k]; }); }
-    applyWeek();
     hist = {};
     Object.entries(o.hist||o.history||{}).forEach(([k,v])=>{
       hist[k] = Array.isArray(v) ? Object.fromEntries(v.map(n=>[n,1])) : v;   // migrate old array form
@@ -1118,87 +1783,770 @@ function load(){
   }catch(e){}
 }
 
+/* ---------- month view ---------- */
+let moOff = 0;   // months from the current one
+function gotoMonth(n){ moOff += n; renderMonth(); }
+function openDate(isoD){
+  const d = new Date(isoD+'T12:00:00'), t = thisSunday();
+  wkOff = Math.round((d - t) / 604800000);
+  day = d.getDay(); view = 'day'; open = null;
+  [['vDay','day'],['vWeek','week'],['vTable','table'],['vMonth','month'],['vStudy','study'],['vTrack','track']]
+    .forEach(([id,k])=>document.getElementById(id).setAttribute('aria-pressed', view===k));
+  applyWeek(); render();
+}
+function renderMonth(){
+  const now = nowDate();
+  const first = new Date(now.getFullYear(), now.getMonth()+moOff, 1);
+  const label = first.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  document.getElementById('moNav').innerHTML =
+    `<button onclick="gotoMonth(-1)">‹</button><b style="font-size:15px">${label}</b>
+     <button onclick="gotoMonth(1)">›</button><span class="spacer"></span>
+     ${moOff!==0?'<button onclick="moOff=0;renderMonth()">This month</button>':''}`;
+  const start = new Date(first); start.setDate(1 - first.getDay());
+  const todayISO = iso(now);
+  const cells = [];
+  for (let k=0;k<42;k++){
+    const d = new Date(start); d.setDate(start.getDate()+k);
+    const isoD = iso(d), out = d.getMonth() !== first.getMonth();
+    const sun = new Date(d); sun.setDate(d.getDate()-d.getDay());
+    const plan = weekFor(iso(sun))[d.getDay()];
+    const n = slotsIn(plan);
+    const ex = extras.filter(e=>e.date===isoD);
+    const rec = hist[isoD];
+    const sc = rec ? Object.values(rec).reduce((a,b)=>a+b,0) / Math.max(1,Object.keys(rec).length) : null;
+    cells.push(`<button class="mo${out?' out':''}${isoD===todayISO?' now':''}" onclick="openDate('${isoD}')">
+      <span class="mod">${d.getDate()}</span>
+      ${n?`<span class="moc">${n}</span>`:''}
+      ${ex.length?`<span class="moe">${ex.length} ●</span>`:''}
+      ${sc!==null?`<span class="mos" style="background:${scoreCol(sc)}"></span>`:''}
+    </button>`);
+  }
+  document.getElementById('moGrid').innerHTML =
+    DN.map(x=>`<div class="moh">${x}</div>`).join('') + cells.join('');
+  document.getElementById('moNote').innerHTML =
+    'The number is how many classes that day. A dot is a one-off task you added. The bar underneath is the score you got. Tap any day to open it.';
+}
+
+/* ---------- school sync ---------- */
+// Webtop needs no login, but it sends no CORS headers, so the app can't call it
+// directly. SYNC.url points at your Cloudflare Worker, which does and adds them.
+let SYNC = { url:'', inst:'541169', grade:10, classNo:14, cals:true, last:null, log:[], seen:{},
+             groups:{...DEFAULT_GROUPS}, migv:0, needGroup:'' };
+let ALLGROUPS = [];          // every group the school runs for your class
+
+/* A subject you have left is worse than one you never had: it keeps matching
+   cancellations and room changes that aren't yours. This unticks the dropped
+   ones from a save made before the change, exactly once, and leaves a note so
+   you're told rather than quietly edited. The replacement subject is NOT
+   ticked for you — its studyGroupID only exists in the live feed. */
+function migrateGroups(){
+  if (SYNC.migv >= 1) return;
+  const gone = Object.keys(DROPPED_GROUPS).filter(id => SYNC.groups && SYNC.groups[id]);
+  gone.forEach(id => delete SYNC.groups[id]);
+  SYNC.migv = 1;
+  if (gone.length) SYNC.needGroup = gone.map(id => DROPPED_GROUPS[id]).join(', ');
+  save();
+}
+// Has the replacement turned up in the feed, and have you ticked it yet?
+const wantGroupSeen = () => ALLGROUPS.filter(g => WANT_GROUP.test(g.subject||''));
+const wantGroupPicked = () => { const G = myGroups();
+  return Object.values(G).some(n => WANT_GROUP.test(String(n||''))); };
+const myGroups   = () => SYNC.groups || {};
+const gradeInfo  = () => GRADES[SYNC.grade] || GRADES[10];
+const classValue = () => `${SYNC.grade}|${SYNC.classNo}`;
+const eventIsMine = sum => makeEventFilter(SYNC.grade, SYNC.classNo, myGroups())(sum);
+const yearCal    = () => ({ cid:gradeInfo().cal, name:gradeInfo().calName, holidays:false });
+let syncing = false;
+
+const sundayISOof = isoD => { const d=new Date(isoD+'T12:00:00');
+  d.setDate(d.getDate()-d.getDay()); return iso(d); };
+
+// ---- the live timetable, compared with your normal week --------------------
+let LIVE_WEEK = null, LIVE_DIFF = [];
+function diffBase(live){
+  const diffs = [];
+  for (let wd=0; wd<5; wd++){
+    const a = BASE[wd]||{}, b = (live && live[wd])||{};
+    SLOTS.forEach(p => {
+      const x = a[p], y = b[p];
+      if (x === undefined && y === undefined) return;
+      if (x !== y) diffs.push({wd, p, was:x||null, now:y||null});
+    });
+  }
+  return diffs;
+}
+function adoptLive(){
+  if (!LIVE_WEEK) return;
+  if (!confirm('Replace your normal week with what Webtop says right now?')) return;
+  for (let wd=0; wd<5; wd++) BASE[wd] = JSON.parse(JSON.stringify(LIVE_WEEK[wd] || {}));
+  LIVE_DIFF = []; applyWeek(); save(); render(); renderSync(); toast('Normal week updated from Webtop');
+}
+
+// ---- proposals -------------------------------------------------------------
+// Sync never changes your week on its own. It proposes, you decide. Every
+// decision is remembered by id, so nothing you've dismissed comes back.
+let PROPS = [];
+const propSeen = id => SYNC.seen && SYNC.seen[id];
+const HORIZON = 8;        // ordinary events — you don't need to approve something in nine months
+const HORIZON_OFF = 45;   // ...but a day with no school is worth knowing about early.
+                          // Sukkot shuts the school for nine days; at 8 days you
+                          // could not see it at all until the night before.
+const daysAway = date => {
+  const t = nowDate(); t.setHours(0,0,0,0);
+  return Math.floor((new Date(date+'T12:00:00') - t) / 86400000);
+};
+const horizonFor = p => (p.kind === 'holiday' ? HORIZON_OFF : HORIZON);
+function withinHorizon(date, kind){
+  const n = daysAway(date);
+  return n >= 0 && n <= horizonFor({kind});
+}
+function addProp(p){
+  if (!p.id || propSeen(p.id)) return;
+  if (!withinHorizon(p.date, p.kind)) return;
+  if (PROPS.some(x => x.id === p.id)) return;
+  PROPS.push(p);
+}
+const KIND = {
+  cancel : {label:'Lesson cancelled', c:'--c2', sure:true},
+  room   : {label:'Room change',      c:'--c1', sure:true},
+  holiday: {label:'School holiday',   c:'--c3', sure:true},
+  event  : {label:'School event',     c:'--c4', sure:false},
+  maybe  : {label:'Possible day off', c:'--c5', sure:false},
+};
+function propsFromClosures(schedule){
+  const days = closedDays(schedule, myGroups());
+  days.forEach(c =>
+    addProp({ id:'closed-'+c.date, kind:'holiday', date:c.date,
+      title:'School closed — all ' + c.lessons + ' of your lessons cancelled',
+      detail:'Webtop cancelled the whole day, so this is the school saying so', src:'Webtop' }));
+  return days.map(c => c.date);
+}
+function propsFromWebtop(changes, closedDates){
+  const shut = new Set(closedDates || []);
+  (changes||[]).forEach(c => {
+    if (shut.has(String(c.date||'').slice(0,10)) && (c.isClassCancel || c.fillUpType === 'cancel')) return;
+    const date = String(c.date||'').slice(0,10); if (!date) return;
+    const slot = SLOT_OF_HOUR(c.hour);
+    if (c.isClassCancel || c.fillUpType === 'cancel')
+      addProp({ id:'wt-cancel-'+c.id, kind:'cancel', date, slot,
+        title:`${c.subject} cancelled`, detail:c.hourName||'', src:'Webtop' });
+    else if (c.isRoomChange || c.room)
+      addProp({ id:'wt-room-'+c.id, kind:'room', date, slot, room:cleanRoom(c.room),
+        title:`${c.subject} → ${cleanRoom(c.room)}`, detail:c.hourName||'', src:'Webtop' });
+  });
+}
+function propsFromCal(cal, evs){
+  const runs = {};
+  evs.forEach(e => {
+    const span = datesOf(e), multi = span.length > 1;
+    span.forEach((date, n) => {
+      if (daysAway(date) < 0) return;                       // already gone
+      const wd = new Date(date+'T12:00:00').getDay();
+      const nth = multi ? ` (day ${n+1} of ${span.length})` : '';
+
+      if (cal.hint){
+        if (wd > 4) return;                                 // Fri/Sat already off
+        // The school's own calendar outranks a guess from the holidays feed.
+        if (PROPS.some(x => x.kind==='holiday' && x.date===date)) return;
+        addProp({ id:'hint-'+date, kind:'maybe', date,
+          title:e.summary+nth, detail:'school may still be running — check', src:cal.name });
+        return;
+      }
+      if (isHoliday(e.summary)){
+        if (!cal.holidays || wd > 4) return;
+        addProp({ id:'hol-'+date, kind:'holiday', date,
+          title:e.summary+nth, detail:'clears the whole day', src:cal.name });
+        return;
+      }
+      if (!eventIsMine(e.summary)) return;
+      if (daysAway(date) > HORIZON) return;
+      if (runs[e.summary]){ runs[e.summary] = date; return; }  // same thing again tomorrow
+      runs[e.summary] = date;
+      addProp({ id:'cal-'+(e.uid||date+e.summary).slice(0,44), kind:'event', date,
+        min:e.min, title:e.summary.slice(0,70), detail:multi?`runs to ${span[span.length-1].slice(8)}/${span[span.length-1].slice(5,7)}`:'', src:cal.name });
+    });
+  });
+  Object.entries(runs).forEach(([sum,last]) => {
+    const p = PROPS.find(x => x.kind==='event' && x.title === sum.slice(0,70));
+    if (p && last !== p.date) p.detail = `runs to ${last.slice(8)}/${last.slice(5,7)}`;
+  });
+}
+function clearDay(date){
+  const sun = sundayISOof(date), wd = new Date(date+'T12:00:00').getDay();
+  if (!WEEK[sun]) WEEK[sun] = {};
+  WEEK[sun][wd] = {};
+}
+function applyProp(id){
+  const p = PROPS.find(x => x.id === id); if (!p) return;
+  if (p.kind === 'cancel'){
+    const sun = sundayISOof(p.date), wd = new Date(p.date+'T12:00:00').getDay();
+    if (!WEEK[sun]) WEEK[sun] = {};
+    if (!WEEK[sun][wd]) WEEK[sun][wd] = JSON.parse(JSON.stringify(BASE[wd] || {}));
+    delete WEEK[sun][wd][p.slot];
+  } else if (p.kind === 'holiday' || p.kind === 'maybe'){
+    clearDay(p.date);
+    extras.push({ id:'x-'+p.id, n:p.title, date:p.date, oneoff:true, t:540, d:0,
+      c:'people', fromSync:true, note:'No school', sub:[p.src] });
+  } else if (p.kind === 'room'){
+    ROOMOVR[p.date + '|' + p.slot] = p.room;      // shows on the lesson itself
+  } else {
+    const bell = BELLS.find(x=>String(x.p)===p.slot);
+    extras.push({ id:'x-'+p.id, n:p.title, date:p.date, oneoff:true,
+      t: p.min != null ? p.min : (bell ? bell.t : 600), d:30,
+      c:'people', fromSync:true, note:p.src + (p.detail?' · '+p.detail:''), sub:[] });
+  }
+  decide(id, 'applied');
+}
+function ignoreProp(id){ decide(id, 'ignored'); }
+function decide(id, how){
+  SYNC.seen = SYNC.seen || {}; SYNC.seen[id] = how;
+  PROPS = PROPS.filter(x => x.id !== id);
+  applyWeek(); save(); render(); renderSync(); renderProps();
+}
+function applyAllSure(){
+  PROPS.filter(p => KIND[p.kind].sure).map(p=>p.id).forEach(applyProp);
+  toast('Applied everything school was certain about');
+}
+function undecide(){ SYNC.seen = {}; save(); toast('Dismissed items will come back on the next check'); renderSync(); }
+
+function renderProps(){
+  const box = document.getElementById('propBox'); if (!box) return;
+  const n = PROPS.length;
+  ['propBadge','propBadge2'].forEach(id=>{ const b=document.getElementById(id);
+    if (b){ b.textContent = n ? String(n) : ''; b.style.display = n ? '' : 'none'; } });
+  if (!n){ box.innerHTML = '<div class="empty">Nothing waiting. Everything school has sent has been dealt with.</div>'; return; }
+  const byDate = PROPS.slice().sort((a,b)=> a.date<b.date?-1: a.date>b.date?1: 0);
+  const card = p => { const k = KIND[p.kind];
+    const d = new Date(p.date+'T12:00:00');
+    return `<div class="prop" style="--pc:var(${k.c})">
+      <div class="ph"><span class="pk">${k.label}</span>
+        <span class="pd">${DN[d.getDay()]} ${p.date.slice(8)}/${p.date.slice(5,7)}</span></div>
+      <div class="pt" dir="auto">${p.title}</div>
+      ${p.detail?`<div class="pn2">${p.detail}</div>`:''}
+      <div class="pa"><button onclick="applyProp('${p.id}')">Apply</button>
+        <button onclick="ignoreProp('${p.id}')">Not mine</button>
+        <span class="psrc">${p.src}</span></div></div>`; };
+
+  // Anything past the ordinary week is a day off found early. It goes in its
+  // own group so the next few days stay at the top where you look.
+  const near = byDate.filter(p => daysAway(p.date) <= HORIZON);
+  const far  = byDate.filter(p => daysAway(p.date) >  HORIZON);
+  const runLabel = far.length
+    ? `${far[0].date.slice(8)}/${far[0].date.slice(5,7)} – ${far[far.length-1].date.slice(8)}/${far[far.length-1].date.slice(5,7)}`
+    : '';
+
+  box.innerHTML = `<div class="bar" style="margin:0 0 10px">
+      <button onclick="applyAllSure()">Apply the certain ones</button>
+      <span class="clock">${n} waiting</span></div>`
+    + near.map(card).join('')
+    + (far.length ? `<div class="daysec" style="margin-top:16px">Further ahead · ${runLabel}</div>
+        <div class="mthint" style="margin:0 0 9px">${far.length} day${far.length===1?'':'s'} with no school,
+          found early so you can plan around ${far.length===1?'it':'them'}.
+          <button onclick="applyRange()" style="margin-left:6px">Apply all ${far.length}</button></div>`
+        + far.map(card).join('') : '');
+}
+// One press for a whole run of closed days — nine separate Applies for Sukkot
+// is not a review, it's a chore.
+function applyRange(){
+  PROPS.slice().filter(p => daysAway(p.date) > HORIZON && KIND[p.kind].sure)
+       .forEach(p => applyProp(p.id));
+  render();
+}
+async function syncSchool(quiet){
+  if (syncing) return;
+  if (!SYNC.url){ if(!quiet) toast('Paste your sync address first'); return; }
+  syncing = true; renderSync();
+  try{
+    const u = SYNC.url.replace(/\/+$/,'') + `/school?inst=${encodeURIComponent(SYNC.inst)}&cls=${encodeURIComponent(classValue())}`;
+    const r = await fetch(u, { cache:'no-store' });
+    if (!r.ok) throw new Error('the proxy answered ' + r.status);
+    const body = await r.text();
+    let d;
+    try { d = JSON.parse(body); }
+    catch(_) { throw new Error(/^\s*<!DOCTYPE|^\s*<html/i.test(body)
+      ? 'got a web page instead of data — is the sync address right?'
+      : 'the proxy sent something that isn\u2019t data'); }
+    if (d.error) throw new Error(d.error);
+
+    ALLGROUPS = allGroupsFrom(d.schedule);
+    LIVE_WEEK = myWeekFrom(d.schedule, myGroups());
+    if (LIVE_WEEK.__rooms){ ROOMS = LIVE_WEEK.__rooms; delete LIVE_WEEK.__rooms; }
+    LIVE_DIFF = diffBase(LIVE_WEEK);
+    const shut = propsFromClosures(d.schedule);
+    propsFromWebtop(myChangesFrom(d.schedule, myGroups()), shut);
+    if (SYNC.cals) await syncCalendars();
+
+    SYNC.last = new Date().toISOString();
+    SYNC.log = PROPS.length
+      ? [`${PROPS.length} thing${PROPS.length===1?'':'s'} from school waiting for you below.`]
+      : ['Checked — nothing new.'];
+    // A calendar that couldn't be read is NOT "nothing new" — say so, or a
+    // fortnight of Sukkot looks exactly like a quiet week.
+    if (CAL_TROUBLE.length) SYNC.log = SYNC.log.concat(CAL_TROUBLE,
+      ['Some of what school publishes could not be read, so this may be incomplete.']);
+    save(); render(); renderSync(); renderProps(); renderGroups();
+    if (!quiet) toast(PROPS.length ? `${PROPS.length} to review` : 'Nothing new');
+  }catch(e){
+    SYNC.log = ['Could not reach the proxy: ' + (e.message||e),
+                'Check the address in Classes, and that the Worker is deployed.'];
+    if (!quiet) toast('Sync failed — see Classes');
+  }finally{ syncing = false; renderSync(); }
+}
+// ---- the school's public Google calendars ----
+let CAL_TROUBLE = [];
+async function syncCalendars(){
+  CAL_TROUBLE = [];
+  for (const cal of [SCHOOL_CAL, yearCal(), HOLIDAY_CAL]){
+    try{
+      const r = await fetch(SYNC.url.replace(/\/+$/,'') + '/ical?cid=' + encodeURIComponent(cal.cid), {cache:'no-store'});
+      if (!r.ok){ CAL_TROUBLE.push(`${cal.name}: proxy said ${r.status}`); continue; }
+      const txt = await r.text();
+      // Never trust a 200. Something that isn't a calendar parses to zero
+      // events and would otherwise read as "nothing on" — say so instead.
+      if (!/BEGIN:VCALENDAR/.test(txt)){
+        CAL_TROUBLE.push(`${cal.name}: that wasn't a calendar — check the sync address`); continue; }
+      const evs = parseICS(txt);
+      if (!evs.length){ CAL_TROUBLE.push(`${cal.name}: reachable, but it has no events at all`); continue; }
+      propsFromCal(cal, evs);
+    }catch(err){ CAL_TROUBLE.push(`${cal.name}: couldn\u2019t read it — ${String(err.message||err).slice(0,50)}`); }
+  }
+}
+function setSync(k, v){ SYNC[k] = typeof v === 'string' ? v.trim() : v; save(); renderSync(); }
+function renderSync(){
+  const box = document.getElementById('syncBox'); if (!box) return;
+  const when = SYNC.last ? new Date(SYNC.last).toLocaleString(undefined,{weekday:'short',hour:'2-digit',minute:'2-digit'}) : 'never';
+  box.innerHTML =
+    `<div class="fg">
+       <div class="f" style="flex:1 1 100%"><label>Sync address (your Cloudflare Worker)</label>
+         <input id="syUrl" value="${(SYNC.url||'').replace(/"/g,'&quot;')}" placeholder="https://schedule-proxy.YOURNAME.workers.dev"
+           onchange="setSync('url', this.value)"></div>
+       <div class="f"><label>School code</label><input value="${SYNC.inst}" onchange="setSync('inst', this.value)"></div>
+       <div class="f"><label>Year</label>
+         <select onchange="setSync('grade', +this.value); syncSchool()">
+           ${[10,11,12].map(g=>`<option value="${g}"${g===SYNC.grade?' selected':''}>${GRADES[g].token} · grade ${g}</option>`).join('')}
+         </select></div>
+       <div class="f"><label>Class number</label>
+         <input type="number" min="1" max="20" value="${SYNC.classNo}" onchange="setSync('classNo', +this.value)"></div>
+     </div>
+     <div class="mthint">Your class is <b>${gradeInfo().token}${SYNC.classNo}</b>. Change the year in September and
+       everything follows — the right year calendar, the right class, and which other years to ignore.
+       Then re-pick your subjects below, because the group numbers change too.</div>
+     <div class="chkline"><input type="checkbox" id="syCal" ${SYNC.cals?'checked':''} style="width:auto"
+        onchange="setSync('cals', this.checked)">
+       <label for="syCal" style="margin:0;text-transform:none;font-size:13px;color:var(--text-primary);font-weight:400">
+         Also read the school calendars — holidays clear the day, your year's events become tasks</label></div>
+     <div class="bar" style="margin:0">
+       <button onclick="syncSchool()" ${syncing?'disabled':''}
+         style="background:var(--text-primary);color:var(--surface-1);border-color:var(--text-primary);font-weight:560">
+         ${syncing?'Checking…':'Check Webtop now'}</button>
+       <span class="clock">last checked: ${when}</span>
+     </div>
+     ${SYNC.log.length?`<div class="synclog">${SYNC.log.map(x=>`<div>${x}</div>`).join('')}</div>`:''}
+     ${LIVE_DIFF.length?`<div class="synclog"><b>Webtop's version of your normal week differs in ${LIVE_DIFF.length} place${LIVE_DIFF.length===1?'':'s'}:</b>
+       ${LIVE_DIFF.slice(0,8).map(x=>`<div>${DAYS[x.wd]} · ${x.p==='M'?'Morning':'Class '+x.p} — ${x.was?('you have '+x.was):'you have nothing'} → ${x.now?('Webtop says '+x.now):'Webtop says nothing'}</div>`).join('')}
+       <div class="bar" style="margin-top:8px"><button onclick="adoptLive()">Use Webtop's version</button></div></div>`:''}`;
+}
+
+/* ---------- skincare ----------
+   The protocol itself lives in the data block above (faceAM / facePM /
+   nonFacePM). This is only the switchboard: which phase, how many retinoid
+   nights, and whether Wednesday still exfoliates. Nothing here moves on its
+   own — every change is a button you press. */
+function toggleSkin(){
+  const p = document.getElementById('skinPanel');
+  p.classList.toggle('hidden');
+  if (!p.classList.contains('hidden')){ renderSkin(); p.scrollIntoView({behavior:'smooth',block:'start'}); }
+}
+function setSkin(patch){ SKIN = {...SKIN, ...patch}; save(); renderSkin(); render(); }
+function skinPhase(n){
+  if (n === SKIN.phase) return;
+  setSkin({ phase:n, since:iso(nowDate()) });   // the counter restarts with the phase
+  toast(n === 2 ? 'Phase 2. Adaferin is back on Monday and Thursday.'
+                : 'Back to phase 1 — every active paused.');
+}
+function renderSkin(){
+  const box = document.getElementById('skinBox'); if (!box) return;
+  const d = daysSince(SKIN.since), wk = Math.floor(d/7) + 1;
+  const rows = [0,1,2,3,4,5,6].map(i =>
+    `<tr><td>${DAYS[i]}</td><td><b>${NIGHT_LABEL[nightType(i)]}</b></td></tr>`).join('');
+
+  box.innerHTML = SKIN.phase === 1 ? `
+    <div class="skinnow"><b>Phase 1 — repair.</b> Day ${d+1}${d>=7?`, week ${wk}`:''}.
+      Five gentle steps a night, the same every night. Every active is paused.</div>
+    <div class="mthint" style="margin:10px 0 12px">Adaferin, the Beauty of Joseon eye serum, bakuchiol,
+      PanOxyl, Timeless vitamin C and the niacinamide serum are all off your face. The caffeine eye gel is
+      allowed if it doesn’t sting. Scalp and brows are untouched by this — the roller, the GHK-Cu and
+      the castor oil carry on exactly as they were.</div>
+    <div class="skinask"><b>Ready to move on?</b> Only when moisturizer no longer stings
+      <i>and</i> the redness is mostly gone. It will never switch by itself.</div>
+    <div class="bar" style="margin-top:10px"><button class="go" onclick="skinPhase(2)">Moisturizer doesn’t sting — start phase 2</button></div>`
+  : `
+    <div class="skinnow"><b>Phase 2 — normal routine.</b> Day ${d+1}, week ${wk}.
+      Adaferin on ${RET_DAYS().map(i=>DN[i]).join(' and ')}.
+      ${vitCToday() ? 'Vitamin C this morning.' : d>=28 ? '' : 'No vitamin C this morning.'}</div>
+    <table class="skintab"><tbody>${rows}</tbody></table>
+
+    ${SKIN.retLevel === 2 && d >= 28 ? `<div class="skinask"><b>Four weeks on Adaferin.</b>
+        Is your skin calm? If it is, Saturday can become a third retinoid night.</div>` : ''}
+
+    <div class="f" style="margin-top:14px"><label>Retinoid nights</label>
+      <div class="segs">${[[1,'Mon'],[2,'Mon + Thu'],[3,'Mon + Thu + Sat']].map(([v,n])=>
+        `<button class="seg${SKIN.retLevel===v?' on':''}" onclick="setSkin({retLevel:${v}})">${n}</button>`).join('')}</div>
+      <div class="mthint">${SKIN.retLevel===3 ? 'Three nights. If redness comes back, drop to two.'
+        : SKIN.retLevel===2 ? 'The starting point. Four weeks here before you add Saturday.'
+        : 'Dialled back to one night. Build up again once it settles.'}</div></div>
+
+    <div class="chkline" style="margin-top:12px"><input type="checkbox" id="skinWed" ${SKIN.wedRec?'checked':''}
+        style="width:auto" onchange="setSkin({wedRec:this.checked})">
+      <label for="skinWed" style="margin:0;text-transform:none;font-size:13px;color:var(--text-primary);font-weight:400">
+        Breakouts are under control — make Wednesday a recovery night too</label></div>
+    <div class="mthint">Unticked, Wednesday is the PanOxyl night. Adaferin and PanOxyl never share a night,
+      so Wednesday can never become a retinoid night while this is off.</div>
+
+    <div class="bar" style="margin-top:14px"><button onclick="skinPhase(1)">Redness is back — return to phase 1</button></div>`;
+}
+
+/* ---------- look & feel ---------- */
+function toggleLook(){
+  const p = document.getElementById('lookPanel');
+  p.classList.toggle('hidden');
+  if (!p.classList.contains('hidden')){ renderLook(); p.scrollIntoView({behavior:'smooth',block:'start'}); }
+}
+const DENSITIES = [['compact','Compact','more on screen'],['normal','Normal',''],['large','Large','bigger text and taps']];
+function renderLook(){
+  const box = document.getElementById('lookBox'); if (!box) return;
+  box.innerHTML = `
+    <div class="f" style="margin-bottom:14px"><label>Theme</label>
+      <div class="segs">${[['auto','Auto'],['light','Light'],['dark','Dark']].map(([k,n])=>
+        `<button class="seg${UI.theme===k?' on':''}" onclick="setUI('theme','${k}')">${n}</button>`).join('')}</div>
+      <div class="mthint">Auto follows your phone.</div></div>
+
+    <div class="f" style="margin-bottom:14px"><label>Accent colour</label>
+      <div class="swatches">${Object.entries(ACCENTS).map(([k,v])=>
+        `<button class="sq${UI.accent===k?' on':''}" title="${v.n}" style="background:${v.v}"
+           onclick="setUI('accent','${k}')"></button>`).join('')}</div></div>
+
+    <div class="f" style="margin-bottom:14px"><label>Text size</label>
+      <div class="segs">${DENSITIES.map(([k,n])=>
+        `<button class="seg${UI.density===k?' on':''}" onclick="setUI('density','${k}')">${n}</button>`).join('')}</div>
+      <div class="mthint">${(DENSITIES.find(d=>d[0]===UI.density)||[])[2]||''}</div></div>
+
+    <div class="chkline"><input type="checkbox" id="uiAnim" ${UI.anim?'checked':''} style="width:auto"
+        onchange="setUI('anim', this.checked)">
+      <label for="uiAnim" style="margin:0;text-transform:none;font-size:13px;color:var(--text-primary);font-weight:400">
+        Movement — things slide, fade and tick instead of snapping</label></div>
+    <div class="mthint">Turned off automatically if your phone is set to reduce motion.</div>`;
+}
+
+/* ---------- the bottom tab bar ---------- */
+const TABS = [
+  ['day',   'Day',   'M4 5h12v11H4z M4 8h12'],
+  ['week',  'Week',  'M3 4h14v12H3z M7 4v12 M11 4v12'],
+  ['month', 'Month', 'M3 5h14v12H3z M3 9h14 M7 3v3 M13 3v3'],
+  ['study', 'Study', 'M4 5l6-2 6 2v9l-6 2-6-2z M10 3v13'],
+];
+function renderTabs(){
+  const n = PROPS.length;
+  document.getElementById('tabbar').innerHTML =
+    TABS.map(([k,label,d])=>`<button class="tb${view===k?' on':''}" onclick="setView('${k}')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>
+        <span>${label}</span></button>`).join('')
+    + `<button class="tb${/track|table/.test(view)?' on':''}" onclick="openMore()">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="4" cy="10" r="1.2" fill="currentColor" stroke="none"/>
+          <circle cx="10" cy="10" r="1.2" fill="currentColor" stroke="none"/>
+          <circle cx="16" cy="10" r="1.2" fill="currentColor" stroke="none"/></svg>
+        <span>More</span>${n?`<i class="tbdot">${n}</i>`:''}</button>`;
+}
+function openMore(){
+  const sheet = document.getElementById('moreSheet');
+  sheet.classList.remove('hidden');
+  const n = PROPS.length;
+  sheet.innerHTML = `<div class="sheetbg" onclick="closeMore()"></div>
+    <div class="sheet">
+      <div class="sheeth">More</div>
+      ${[['Classes & sync', `toggleTT()`, n?`${n} waiting`:''],
+         ['Tracker',        `setView('track')`, ''],
+         ['List',           `setView('table')`, ''],
+         ['Skincare',       `toggleSkin()`, SKIN.phase===1 ? 'phase 1' : ''],
+         ['Look & feel',    `toggleLook()`, ''],
+         ['Save a backup',  `saveProgress()`, ''],
+         ['Load a backup',  `document.getElementById('fin').click()`, '']]
+        .map(([n2,fn,badge])=>`<button class="sheetb" onclick="closeMore();${fn}">
+            ${n2}${badge?`<i class="pbadge">${badge}</i>`:''}</button>`).join('')}
+      <button class="sheetb cancel" onclick="closeMore()">Close</button>
+    </div>`;
+}
+function closeMore(){ document.getElementById('moreSheet').classList.add('hidden'); }
+
+/* ---------- habits, as a compact strip ---------- */
+let habitOpen = null;
+function habitState(i){
+  // ALLDAY entries carry no category of their own — they're daily routine.
+  const raw = ALLDAY[i], b = {c:'morning', ...raw, allday:true, d:0}, base = `${mode}-${day}-a${i}`;
+  const f = taskScore(b, base);
+  return { b, base, f, done:f >= 1 };
+}
+function tapHabit(i){ habitOpen = (habitOpen === i) ? null : i; render(); }
+function renderHabits(){
+  const strip = document.getElementById('habits');
+  strip.innerHTML = ALLDAY.map((raw,i) => {
+    const {b, base, f, done} = habitState(i);
+    const name = ALLDAY_SHORT[raw.n] || raw.n;
+    const amt = b.q ? (amounts[base]===undefined||amounts[base]==='' ? 0 : Number(amounts[base])) : null;
+    const sub = b.q ? `${amt >= 1000 ? (amt/1000).toFixed(1).replace(/\.0$/,'')+'k' : amt}/${b.q.target >= 1000 ? (b.q.target/1000)+'k' : b.q.target}` : '';
+    return `<button class="hb${done?' done':''}${habitOpen===i?' open':''}" onclick="tapHabit(${i})"
+      style="--p:${Math.round(f*100)}%">
+      <span class="hbr"></span>
+      <span class="hbn">${name}</span>
+      ${sub?`<span class="hbs">${sub}</span>`:''}
+      ${done?'<span class="hbk">✓</span>':''}</button>`;
+  }).join('');
+  const box = document.getElementById('habitOpen');
+  box.innerHTML = '';
+  if (habitOpen === null) return;
+  const i = habitOpen, {b, base} = habitState(i);
+  const c = card(b, base, { key:'a'+i, wd:day, forceOpen:true,
+    onToggle:()=>toggleTask(day,i,true),
+    onStep:j=>toggleStep(day,base,b,j),
+    onAmount:v=>setAmount(day,base,b,v) });
+  box.appendChild(c);
+}
+
+/* ---------- my subjects ---------- */
+// The school runs many groups per subject. These are the ones you're in —
+// and they are what every cancellation, room and closure is matched against.
+function toggleGroup(id){
+  id = Number(id);
+  const g = ALLGROUPS.find(x => x.id === id); if (!g) return;
+  if (myGroups()[id]) delete SYNC.groups[id];
+  else {
+    SYNC.groups[id] = (g.subject + ' ' + lvl(g.level)).trim();
+    if (WANT_GROUP.test(g.subject||'')) SYNC.needGroup = '';   // the swap is finished
+  }
+  applyWeek(); save(); renderGroups(); render();
+}
+const lvl = L => { const m = /(\d(?:-\d)?)\s*יח/.exec(String(L||'')); return m ? m[1] : ''; };
+// The banner that survives until the swap is actually finished.
+function groupSwapNote(){
+  if (!SYNC.needGroup || wantGroupPicked()) return '';
+  const seen = wantGroupSeen();
+  return `<div class="swapnote"><b>${SYNC.needGroup} unticked.</b> You left it, so it no longer
+    matches cancellations or room changes. ` + (seen.length
+      ? `Tick your <b>הנדסת תוכנה</b> group below — ${seen.length === 1
+          ? 'there is one, and it is already in the list.'
+          : `there are ${seen.length}; the teacher is what tells them apart.`}`
+      : `Press <b>Check Webtop now</b> and your הנדסת תוכנה group will appear below to tick.
+         Until you do, Thursday 7–8 is a placeholder.`) + `</div>`;
+}
+function renderGroups(){
+  const box = document.getElementById('grpBox'); if (!box) return;
+  const G = myGroups(), picked = Object.keys(G).length;
+  if (!ALLGROUPS.length){
+    box.innerHTML = groupSwapNote() + `<div class="empty">Press <b>Check Webtop now</b> and the school's groups will appear here
+      — ${picked} subject${picked===1?'':'s'} are set from last time.</div>`;
+    return;
+  }
+  const bySubj = {};
+  ALLGROUPS.forEach(g => { (bySubj[g.subject] = bySubj[g.subject] || []).push(g); });
+  box.innerHTML = groupSwapNote() + `<div class="mthint" style="margin:0 0 10px">${picked} picked. Tick the group you're actually in —
+      the teacher is what tells them apart.</div>` +
+    Object.entries(bySubj).map(([subj, gs]) => {
+      const anyMine = gs.some(g => G[g.id]);
+      const wanted = !anyMine && WANT_GROUP.test(subj);
+      return `<div class="grp${anyMine?' has':''}${wanted?' wanted':''}">
+        <div class="gs" dir="auto">${subj}</div>
+        ${gs.map(g => `<button class="gg${G[g.id]?' on':''}" onclick="toggleGroup(${g.id})">
+            <span class="gt" dir="auto">${g.teacher||'—'}</span>
+            <span class="gm">${lvl(g.level)?lvl(g.level)+' יח״ל · ':''}${g.room||''}${g.n?' · '+g.n+'/wk':''}</span>
+          </button>`).join('')}
+      </div>`; }).join('');
+}
+
+/* ---------- study topics ---------- */
+// A backlog of what you actually need to study. Study blocks pull from the top,
+// and the minutes you log come off the topic.
+let TLOG = {};            // TLOG[taskBase] = {id, m} — which topic got which minutes
+const liveTopics = () => TOPICS.filter(t => topicDone(t) < t.mins);
+function topicDone(t){
+  let n = 0; Object.values(TLOG).forEach(r => { if (r.id === t.id) n += r.m; });
+  return n;
+}
+const nextTopic = () => liveTopics()[0] || null;
+function addTopic(){
+  const n = tName.value.trim(), m = Math.max(5, parseInt(tMins.value) || 60);
+  if (!n){ tName.focus(); return; }
+  TOPICS.push({ id:'t'+Date.now()+'-'+Math.random().toString(36).slice(2,7), subj:tSubj.value, n, mins:m });
+  tName.value=''; save(); renderStudy(); render();
+}
+function delTopic(id){
+  TOPICS = TOPICS.filter(t => t.id !== id);
+  Object.keys(TLOG).forEach(k => { if (TLOG[k].id === id) delete TLOG[k]; });
+  save(); renderStudy(); render();
+}
+function bumpTopic(id, dir){
+  const i = TOPICS.findIndex(t => t.id === id), j = i + dir;
+  if (i < 0 || j < 0 || j >= TOPICS.length) return;
+  [TOPICS[i], TOPICS[j]] = [TOPICS[j], TOPICS[i]];
+  save(); renderStudy(); render();
+}
+function finishTopic(id){
+  const t = TOPICS.find(x => x.id === id); if (!t) return;
+  TLOG['manual-'+id+'-'+Date.now()] = { id, m: Math.max(0, t.mins - topicDone(t)) };
+  save(); renderStudy(); render();
+}
+// Minutes logged on a study block go to whichever topic it was showing.
+function logTopic(base, mins){
+  const cur = TLOG[base];
+  const id = cur ? cur.id : (nextTopic() || {}).id;
+  if (!id) return;
+  if (mins > 0) TLOG[base] = { id, m: mins }; else delete TLOG[base];
+  save();
+}
+function renderStudy(){
+  const list = document.getElementById('tpList');
+  document.getElementById('tSubj').innerHTML =
+    SUBJECTS.map(x=>`<option${x===tSubjLast?' selected':''}>${x}</option>`).join('');
+  const live = liveTopics(), done = TOPICS.filter(t => topicDone(t) >= t.mins);
+  const left = live.reduce((a,t)=>a + (t.mins - topicDone(t)), 0);
+  document.getElementById('tpSum').innerHTML = TOPICS.length
+    ? `<b>${hrs(left)}</b> of study queued · ${live.length} topic${live.length===1?'':'s'} open`
+      + (done.length?` · ${done.length} finished`:'')
+    : 'Nothing queued yet. Add what you actually need to get through — the study blocks pull from the top of this list.';
+  const row = (t, i) => { const d = topicDone(t), pct = Math.min(100, Math.round(d/t.mins*100)), fin = d >= t.mins;
+    return `<div class="tp${fin?' fin':''}">
+      <div class="tpb"><div class="tpf" style="width:${pct}%"></div></div>
+      <div class="tph">
+        <span class="tps" dir="auto">${t.subj}</span>
+        ${i===0&&!fin?'<span class="tpnow">NEXT</span>':''}
+      </div>
+      <div class="tpn" dir="auto">${t.n}</div>
+      <div class="tpm">${d} of ${t.mins} min${fin?' · done':''}</div>
+      <div class="tpa">
+        ${fin?'':`<button onclick="bumpTopic('${t.id}',-1)" title="Up">↑</button>
+                  <button onclick="bumpTopic('${t.id}',1)" title="Down">↓</button>
+                  <button onclick="finishTopic('${t.id}')">Mark done</button>`}
+        <button onclick="delTopic('${t.id}')">Remove</button>
+      </div></div>`; };
+  list.innerHTML = live.map(row).join('')
+    + (done.length ? `<div class="hdr" style="margin-top:14px">Finished</div>` + done.map(t=>row(t,-1)).join('') : '')
+    || '<div class="empty">No topics yet.</div>';
+}
+let tSubjLast = SUBJECTS[0];
+
 /* ---------- the week planner ---------- */
-// A fresh set of classes every week. WEEK[sundayISO][weekday][slot] = subject
-// string if the class runs, absent if it doesn't.
-let plWk = 0;                       // which week the planner is showing: 0 = this one
-let plDay = 0;                      // which weekday the planner is editing
-const sundayOf = off => { const d=weekStart(); d.setDate(d.getDate()+off*7); return iso(d); };
-const wkLabel = off => { const d=weekStart(); d.setDate(d.getDate()+off*7);
+// Your timetable is the same most weeks, so there's a NORMAL WEEK (BASE) that
+// every week inherits. A week only gets its own copy of a day once you change
+// something on it — and that copy affects that week alone.
+let plWk = -1;                      // -1 = the normal week, 0 = this week, 1 = next…
+let plDay = 0;
+const sundayOf = off => { const d=thisSunday(); d.setDate(d.getDate()+off*7); return iso(d); };
+const wkLabel = off => { if (off===-1) return 'Normal week';
+  const d=thisSunday(); d.setDate(d.getDate()+off*7);
   const e=new Date(d); e.setDate(e.getDate()+4);
   const f=x=>x.toLocaleDateString(undefined,{day:'numeric',month:'short'});
   return `${f(d)} – ${f(e)}` + (off===0?' · this week':off===1?' · next week':''); };
-const planOf  = off => WEEK[sundayOf(off)] || null;
-function applyWeek(){ WEEKDAYS = buildWeek(planOf(0)); }
-function haveWeek(off){ const p=planOf(off);
-  return !!p && [0,1,2,3,4].some(d=>p[d] && Object.keys(p[d]).length); }
+// The plan actually in force for one weekday.
+function planDay(off, wd){
+  if (off===-1) return BASE[wd] || null;
+  const w = WEEK[sundayOf(off)];
+  if (w && w[wd]) return w[wd];
+  return BASE[wd] || null;
+}
+const planWeek   = off => { const o={}; for(let d=0;d<7;d++) o[d]=planDay(off,d); return o; };
+const weekFor    = sun => { const o={}, w=WEEK[sun]||{};
+  for(let d=0;d<7;d++) o[d] = (w[d] || BASE[d] || null); return o; };
+const changedOn  = (off,wd) => off>=0 && !!(WEEK[sundayOf(off)] && WEEK[sundayOf(off)][wd]);
+const slotsIn    = pl => pl ? SLOTS.filter(p=>p in pl).length : 0;
+const baseSet    = () => [0,1,2,3,4].filter(d=>slotsIn(BASE[d])).length;
+let wkCache = {};
+function applyWeek(){ wkCache = {}; WEEKDAYS = buildWeek(planWeek(wkOff)); }
+function gotoWeek(n){
+  wkOff = Math.max(-52, Math.min(52, wkOff + n));
+  day = wkOff===0 ? realToday() : 0;
+  open = null; applyWeek(); render();
+}
+function gotoToday(){ wkOff = 0; day = realToday(); open = null; applyWeek(); render(); }
 function toggleTT(){
   const p=document.getElementById('ttPanel');
   p.classList.toggle('hidden');
   if(!p.classList.contains('hidden')){
-    plWk = 0; plDay = [0,1,2,3,4].includes(day) ? day : 0;
-    renderPlan(); p.scrollIntoView({behavior:'smooth',block:'start'});
+    if (!baseSet()) plWk = -1;                 // nothing set up yet — start on the normal week
+    plDay = [0,1,2,3,4].includes(day) ? day : 0;
+    renderPlan(); renderSync(); renderProps(); renderGroups(); p.scrollIntoView({behavior:'smooth',block:'start'});
   }
 }
-function plWeek(n){ plWk = Math.max(0, Math.min(8, plWk+n)); renderPlan(); }
+function plWeek(n){ plWk = Math.max(-1, Math.min(8, plWk+n)); renderPlan(); }
 function plPick(d){ plDay = d; renderPlan(); }
-function ensureWk(off){ const k=sundayOf(off); if(!WEEK[k]) WEEK[k]={}; if(!WEEK[k][plDay]) WEEK[k][plDay]={}; return WEEK[k]; }
+// Editing a real week forks that day off the normal week first.
+function ensureDay(off, wd){
+  if (off===-1){ if(!BASE[wd]) BASE[wd]={}; return BASE[wd]; }
+  const k = sundayOf(off);
+  if (!WEEK[k]) WEEK[k] = {};
+  if (!WEEK[k][wd]) WEEK[k][wd] = JSON.parse(JSON.stringify(BASE[wd] || {}));
+  return WEEK[k][wd];
+}
+function touched(){
+  Object.keys(WEEK).forEach(k=>{ if(!Object.keys(WEEK[k]).length) delete WEEK[k]; });
+  if (plWk<=0 || plWk===wkOff) applyWeek();
+  save();
+}
 function slotOn(slot, on){
-  const w = ensureWk(plWk);
-  if (on) w[plDay][slot] = w[plDay][slot] || '';
-  else delete w[plDay][slot];
-  if (plWk===0) applyWeek();
-  save(); renderPlan(); if(plWk===0) render();
+  const pl = ensureDay(plWk, plDay);
+  if (on) pl[slot] = pl[slot] || ''; else delete pl[slot];
+  touched(); renderPlan(); if (plWk<=0) render();
 }
 function slotName(slot, val){
-  const w = ensureWk(plWk);
-  if (!(slot in w[plDay])) return;
-  w[plDay][slot] = val;
-  if (plWk===0) applyWeek();
-  save(); if(plWk===0) render();
+  const pl = ensureDay(plWk, plDay);
+  if (!(slot in pl)) return;
+  pl[slot] = val;
+  touched(); if (plWk<=0) render();
 }
-function plAllOn(){ const w=ensureWk(plWk);
-  SLOTS.filter(p=>p!=='M').forEach(p=>{ if(!(p in w[plDay])) w[plDay][p]=''; });
-  if(plWk===0) applyWeek(); save(); renderPlan(); if(plWk===0) render(); }
-function plClearDay(){ const w=ensureWk(plWk); w[plDay]={};
-  if(plWk===0) applyWeek(); save(); renderPlan(); if(plWk===0) render();
-  toast(`No school ${DAYS[plDay]} that week`); }
-function plCopy(){
-  // copy the most recent week that has anything in it
-  let src=null;
-  for (let o=plWk-1; o>=plWk-8; o--){ if (haveWeek(o)){ src=planOf(o); break; } }
-  if (!src){ for (const k of Object.keys(WEEK).sort().reverse()){
-      if (k < sundayOf(plWk) && [0,1,2,3,4].some(d=>WEEK[k][d]&&Object.keys(WEEK[k][d]).length)){ src=WEEK[k]; break; } } }
-  if (!src){ toast('Nothing to copy from yet'); return; }
-  WEEK[sundayOf(plWk)] = JSON.parse(JSON.stringify(src));
-  if (plWk===0) applyWeek();
-  save(); renderPlan(); if(plWk===0) render(); toast('Copied the last week you filled in');
-}
-function plClearWeek(){
-  if(!confirm(`Clear every class in ${wkLabel(plWk)}?`)) return;
-  delete WEEK[sundayOf(plWk)];
-  if (plWk===0) applyWeek();
-  save(); renderPlan(); if(plWk===0) render();
+function plAllOn(){ const pl=ensureDay(plWk, plDay);
+  SLOTS.filter(p=>p!=='M').forEach(p=>{ if(!(p in pl)) pl[p]=''; });
+  touched(); renderPlan(); if(plWk<=0) render(); }
+function plNoSchool(){ const pl=ensureDay(plWk, plDay);
+  SLOTS.forEach(p=>delete pl[p]);
+  touched(); renderPlan(); if(plWk<=0) render();
+  toast(plWk===-1 ? `No school on a normal ${DAYS[plDay]}` : `No school ${DN[plDay]} that week`); }
+function plBackToNormal(){
+  const k=sundayOf(plWk); if (WEEK[k]) delete WEEK[k][plDay];
+  touched(); renderPlan(); if(plWk<=0) render(); toast(`${DAYS[plDay]} back to your normal week`); }
+function plMakeNormal(){
+  const k=sundayOf(plWk), cur=WEEK[k] && WEEK[k][plDay];
+  if (!cur) return;
+  if(!confirm(`Make this your normal ${DAYS[plDay]} from now on?`)) return;
+  BASE[plDay] = JSON.parse(JSON.stringify(cur));
+  delete WEEK[k][plDay];
+  touched(); renderPlan(); if(plWk<=0) render(); toast(`That's your normal ${DAYS[plDay]} now`); }
+function plResetWeek(){
+  if (plWk===-1){ if(!confirm('Clear your whole normal week?')) return; BASE={}; }
+  else { if(!confirm(`Put every day in ${wkLabel(plWk)} back to your normal week?`)) return;
+         delete WEEK[sundayOf(plWk)]; }
+  touched(); renderPlan(); if(plWk<=0) render();
 }
 function renderPlan(){
-  const w = planOf(plWk) || {}, pl = w[plDay] || {};
-  const n = SLOTS.filter(p => p in pl).length;
+  const pl = planDay(plWk, plDay) || {}, n = slotsIn(pl), chg = changedOn(plWk, plDay);
   document.getElementById('plHead').innerHTML =
-    `<button onclick="plWeek(-1)" ${plWk<=0?'disabled':''}>‹</button>
+    `<button onclick="plWeek(-1)" ${plWk<=-1?'disabled':''}>‹</button>
      <b>${wkLabel(plWk)}</b>
      <button onclick="plWeek(1)">›</button>
      <span class="spacer"></span>
-     <button onclick="plCopy()">Copy last week</button>
-     <button onclick="plClearWeek()">Clear week</button>`;
+     <button onclick="plResetWeek()">${plWk===-1?'Clear normal week':'Whole week back to normal'}</button>`;
   document.getElementById('plDays').innerHTML = [0,1,2,3,4].map(d=>{
-    const c = w[d] ? SLOTS.filter(p=>p in w[d]).length : 0;
+    const c = slotsIn(planDay(plWk, d));
     return `<button class="pld${d===plDay?' on':''}" onclick="plPick(${d})" aria-pressed="${d===plDay}">
-      <span class="pn">${DN[d]}</span><span class="pc">${c?c+(c===1?' class':' classes'):'—'}</span></button>`;
+      <span class="pn">${DN[d]}${changedOn(plWk,d)?' ●':''}</span>
+      <span class="pc">${c?c+(c===1?' class':' classes'):'—'}</span></button>`;
   }).join('');
   const per = periodsFor(pl);
-  document.getElementById('plWhen').textContent = per.length
-    ? `${DAYS[plDay]}: ${fmt(per[0].t)} – ${fmt(per[per.length-1].t + per[per.length-1].d)} · ${n} ${n===1?'class':'classes'}`
-    : `${DAYS[plDay]}: no school — the day falls back to a full free day.`;
+  document.getElementById('plWhen').innerHTML =
+    (per.length ? `${DAYS[plDay]}: ${fmt(per[0].t)} – ${fmt(per[per.length-1].t + per[per.length-1].d)} · ${n} ${n===1?'class':'classes'}`
+                : `${DAYS[plDay]}: no school — the day falls back to a full free day.`)
+    + (plWk===-1 ? ' <span class="plt2">This is the baseline every week starts from.</span>'
+       : chg ? ' <span class="plt2 chg">Changed for this week only.</span>'
+             : ' <span class="plt2">Same as your normal week — edit anything and it changes this week only.</span>');
   document.getElementById('plRows').innerHTML = BELLS.map(b=>{
     const on = b.p in pl;
     return `<div class="plr${on?'':' off'}">
@@ -1210,17 +2558,26 @@ function renderPlan(){
         oninput="slotName('${b.p}', this.value)">
     </div>`;
   }).join('')
-  + `<div class="bar" style="margin-top:10px"><button onclick="plAllOn()">All 8 classes on</button>
-     <button onclick="plClearDay()">No school this day</button></div>`;
+  + `<div class="bar" style="margin-top:10px">
+       <button onclick="plAllOn()">All 8 classes on</button>
+       <button onclick="plNoSchool()">No school this day</button>
+       ${chg?`<button onclick="plBackToNormal()">Back to normal</button>
+              <button onclick="plMakeNormal()">Make this the new normal</button>`:''}
+     </div>`;
 }
 function renderQuickDay(){
-  const box=document.getElementById('quickday');
-  if (day>4){ box.innerHTML=''; return; }
-  const pl=(planOf(0)||{})[day]||{}, n=SLOTS.filter(p=>p in pl).length;
+  // On a phone these buttons ride along in the week-nav row — two 45px rows become one.
+  const phone = onPhone(), own = document.getElementById('quickday');
+  own.innerHTML = '';
+  if (day>4) return;
+  const n = slotsIn(planDay(0, day)), chg = changedOn(0, day);
   const lbl = day===todayIdx() ? 'today' : DN[day];
-  box.innerHTML = n
-    ? `<button onclick="plDay=${day};plWk=0;toggleTT()">Edit ${lbl}’s classes (${n})</button>`
-    : `<button onclick="plDay=${day};plWk=0;toggleTT()">No classes set for ${lbl} — add them</button>`;
+  const html =
+    (n ? `<button onclick="plDay=${day};plWk=0;toggleTT()">Edit ${lbl}’s classes (${n})${chg?' · changed':''}</button>`
+       : `<button onclick="plDay=${day};plWk=${baseSet()?0:-1};toggleTT()">No classes ${lbl} — set them</button>`)
+    + (chg ? `<button onclick="plDay=${day};plWk=0;plBackToNormal()">Back to normal</button>` : '');
+  if (phone) document.getElementById('wknav').insertAdjacentHTML('beforeend', html);
+  else own.innerHTML = html;
 }
 
 /* ---------- scoring — you log the amount, this derives the score ---------- */
@@ -1378,14 +2735,18 @@ function renderFree(){
   }
   const why = mtPick!=='open' && sel.items.map(i=>MT_WHY[i.n]).find(Boolean);
 
+  const openFree = !!UI.freeOpen;
+  c.className = 'free' + (openFree ? '' : ' shut');
   c.innerHTML =
-   `<div class="fk">Free time ${isToday?'today':'· '+DAYS[day]}</div>
+   `<button class="fhead" onclick="UI.freeOpen=!UI.freeOpen;save();renderFree()">
+      <span class="fk">Free time ${isToday?'today':'· '+DAYS[day]}</span>
+      <span class="qchev${openFree?' open':''}">▾</span></button>
     <div class="fv">${hrs(f.total)} <span class="fx">open</span>${f.stacked?` <span class="fp">+ ${hrs(f.stacked)} you could stack on</span>`:''}</div>
     <div class="fs">of ${hrs(f.span)} between ${fmt(f.start)} and ${fmt(f.end)}`
     + (left!==null ? ` · <b style="color:var(--text-primary)">${hrs(left)} of the open time still to come</b>` : '') + `</div>
     <div class="fbar">${bar}</div>
     <div class="mtrow">${pills}</div>
-    <div class="mtwhat"><b>${K.label}.</b> ${K.what} ${K.fits}${
+    <div class="mtwhat${UI.freeInfo?'':' clipped'}" onclick="UI.freeInfo=!UI.freeInfo;save();renderFree()"><b>${K.label}.</b> ${K.what} ${K.fits}${
       K.burst&&f.chunk[mtPick]?` Today’s pieces run about ${f.chunk[mtPick].toFixed(1)} min each.`:''}</div>
     <div class="fgaps">${body}</div>`
     + (why?`<div class="mtwhy">${why}</div>`:'');
@@ -1403,12 +2764,20 @@ function renderStats(){
 }
 function renderHeader(){
   const d=nowDate();
-  const date=d.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const small = onPhone();
+  const date=d.toLocaleDateString(undefined, small
+    ? {weekday:'short',day:'numeric',month:'short'}
+    : {weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const time=d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',hour12:false});
-  const pl=(planOf(0)||{}), set=[0,1,2,3,4].filter(i=>pl[i]&&Object.keys(pl[i]).length).length;
+  const set = baseSet();
+  const chg = [0,1,2,3,4].filter(i=>changedOn(0,i)).length;
   document.getElementById('today').innerHTML =
     `<span class="clock">${date} · ${time}</span>`
-    + (set<5 ? ` · <b>${5-set} day${set===4?'':'s'} of classes not filled in yet</b>` : ' · classes are in for this week');
+    + (!set ? ' · <b>your normal week isn’t set up yet — tap Classes</b>'
+      : set<5 ? ` · <b>${5-set} day${set===4?'':'s'} missing from your normal week</b>`
+      : chg ? ` · ${chg} day${chg===1?'':'s'} changed this week`
+      : small ? ''
+            : ' · running your normal week');
 }
 
 /* ---------- one-off tasks ---------- */
@@ -1429,10 +2798,18 @@ function prefill(o, dateStr){
   if (view!=='day') setView('day');
   f.scrollIntoView({behavior:'smooth',block:'center'});
 }
+const QDATES = [['Today',0],['Tomorrow',1],['In 2 days',2],['Next week',7],['In 2 weeks',14],['In a month',30]];
+function setQDate(n){ const d=nowDate(); d.setDate(d.getDate()+n); fDate.value=iso(d); renderQDates(); }
+function renderQDates(){
+  const cur=fDate.value;
+  document.getElementById('fQuickDate').innerHTML = QDATES.map(([lab,n])=>{
+    const d=nowDate(); d.setDate(d.getDate()+n);
+    return `<span class="chip${iso(d)===cur?' on':''}" onclick="setQDate(${n})">${lab}</span>`; }).join('');
+}
 function toggleForm(){ const f=document.getElementById('form'); f.classList.toggle('hidden');
-  if(!f.classList.contains('hidden')){ fDate.value=dateFor(day); renderFormMt(); fName.focus(); } }
+  if(!f.classList.contains('hidden')){ fDate.value=dateFor(day); renderQDates(); renderFormMt(); fName.focus(); } }
 function quickAdd(i){
-  const o=QUICKADD[i], [hh,mm]=(o.time||'16:00').split(':').map(Number), id='q'+Date.now();
+  const o=QUICKADD[i], [hh,mm]=(o.time||'16:00').split(':').map(Number), id='q'+Date.now()+Math.random().toString(36).slice(2,6);
   extras.push({id, n:o.n, date:dateFor(day), oneoff:true, t:hh*60+mm, d:o.d||30, c:o.c||'people', note:o.note, sub:(o.sub||[]).slice()});
   lastAdded=id; save(); render(); toast(`Added “${o.n}” to ${DN[day]} ${dayNum(day)}`, true);
 }
@@ -1453,7 +2830,7 @@ function addTask(){
     save(); render(); toast(`Added to every ${DAYS[wd]}`);
     return;
   }
-  extras.push({ id:'x'+Date.now(), n, date, oneoff:true, t:hh*60+mm,
+  extras.push({ id:'x'+Date.now()+Math.random().toString(36).slice(2,6), n, date, oneoff:true, t:hh*60+mm,
     d:Math.max(5,parseInt(fDur.value)||30), c:fcat, prio:fPrio.checked,
     note:fNote.value.trim()||undefined,
     sub:fSteps.value.split('\n').map(x=>x.trim()).filter(Boolean) });
@@ -1497,6 +2874,7 @@ function mtPickHTML(state, auto, dur, fnPick, fnMin, isNew){
     </div>`;
 }
 function pickEditMt(k){
+  grabDraft();
   const inp = document.getElementById('eMt');
   const cur = inp && inp.value !== '' ? parseInt(inp.value) : null;
   editMt = k==='none' ? {k:'none', m:0}
@@ -1524,14 +2902,22 @@ function readMt(state, inputId, dur){
 }
 
 /* ---------- editing any task, in place ---------- */
+let edDraft = null;
+// Snapshot the fields before anything re-renders the editor.
+function grabDraft(){
+  const g = id => { const e = document.getElementById(id); return e ? e.value : undefined; };
+  if (!document.getElementById('eN')) return;
+  edDraft = { n:g('eN'), t:g('eT'), d:g('eD'), note:g('eNote'), steps:g('eSteps'), mt:g('eMt') };
+}
 function startEdit(key, b){
+  edDraft = null;
   editing = key; editCat = b.c; editScope = 'week'; open = key;
   const auto = mtAuto(b), cur = MTO[b.n];
   editMtAuto = auto ? auto.m : 0;
   editMt = cur ? {...cur} : (auto ? {k:auto.k, m:auto.m} : {k:'none', m:0});
   render();
 }
-function cancelEdit(){ editing = null; render(); }
+function cancelEdit(){ editing = null; edDraft = null; render(); }
 function saveEdit(b, wd){
   const g = id => document.getElementById(id).value;
   const [hh,mm] = (g('eT')||'00:00').split(':').map(Number);
@@ -1551,12 +2937,15 @@ function saveEdit(b, wd){
   if (b.oneoff){                                  // a dated one-off edits itself
     const e = extras.find(x=>x.id===b.id);
     if (e) Object.assign(e, patch);
+  } else if (b.added){                            // one you added to every week
+    const a = ADDED.find(x=>x.mode===mode && x.wd===wd && x.n===b.n);
+    if (a) Object.assign(a, patch);
   } else if (editScope === 'day'){
     PATCH.daily[kD(dateFor(wd), b.n)] = patch;
   } else {
     PATCH.weekly[kW(mode, wd, b.n)] = patch;
   }
-  editing = null; open = null; save(); render();
+  editing = null; edDraft = null; open = null; save(); render();
   toast(editScope==='day' && !b.oneoff ? 'Changed for that date only' : 'Saved');
 }
 function skipToday(b, wd){
@@ -1584,14 +2973,14 @@ function removeTask(id){ const i=extras.findIndex(e=>e.id===id); if(i>=0) extras
 /* ---------- task card ---------- */
 function card(b, base, opts){
   const {isCur=false, isPast=false, key} = opts;
-  const isOpen = open===key, isDone = !!done[base];
+  const isOpen = opts.forceOpen || open===key, isDone = !!done[base];
   const steps = stepsOf(b), nReal = realSteps(b).length;
   const nDone = steps.filter((s,j)=>!isHdr(s)&&done[`${base}-s${j}`]).length;
   const f = taskScore(b, base);
 
   const c = el('div','task'+(isOpen?' open':'')+(isDone?' done':'')+(isCur?' current':'')
              +(isPast&&!isDone?' past':'')+(b.oneoff?' oneoff':''),'');
-  c.style.setProperty('--bc', CAT[b.c].c);
+  c.style.setProperty('--bc', (CAT[b.c] || CAT.morning).c);
   const row = el('div','trow','');
   const cb = el('button','cb',''); cb.setAttribute('aria-checked',isDone);
   cb.onclick = e => { e.stopPropagation(); opts.onToggle(); };
@@ -1599,7 +2988,7 @@ function card(b, base, opts){
   const badge = (f>0 && f<1) ? `<span class="score" style="background:${scoreCol(f)}">${Math.round(f*100)}%</span>` : '';
   mid.innerHTML = `<div class="tt">${b.n}${b.prio?'<span class="prio">★</span>':''}${badge}`
     + `${isCur?'<span class="badge">NOW</span>':''}${b.oneoff?'<span class="badge" style="background:var(--muted)">ONE-OFF</span>':''}${b.edited?'<span class="edited">EDITED</span>':''}</div>`
-    + `<div class="tmeta">${b.allday?'all day':b.d+' min'}`
+    + `<div class="tmeta">${b.room?`<span class="room" dir="auto">${b.room}</span> · `:''}${b.allday?'all day':b.d+' min'}`
     + (b.q ? ` · ${amounts[base]||0}/${b.q.target} ${b.q.label}` : (nReal?` · ${nDone}/${nReal} steps`:'')) + `</div>`;
   row.append(el('div','time', b.allday ? '' : fmt(b.t)), cb, mid, el('div','chev','▶'));
   row.onclick = () => { open = isOpen?null:key; render(); };
@@ -1612,8 +3001,8 @@ function card(b, base, opts){
     ed.onclick = e => e.stopPropagation();
     ed.innerHTML = `
       ${b.oneoff ? '' : `<div class="scope">
-        <button id="scD" aria-pressed="${editScope==='day'}" onclick="editScope='day';render()">Just ${DN[wd]} ${dayNum(wd)}</button>
-        <button id="scW" aria-pressed="${editScope==='week'}" onclick="editScope='week';render()">Every ${DAYS[wd]}</button>
+        <button id="scD" aria-pressed="${editScope==='day'}" onclick="grabDraft();editScope='day';render()">Just ${DN[wd]} ${dayNum(wd)}</button>
+        <button id="scW" aria-pressed="${editScope==='week'}" onclick="grabDraft();editScope='week';render()">Every ${DAYS[wd]}</button>
       </div>`}
       <div class="fg">
         <div class="f"><label>Name</label><input id="eN" value="${(b.n||'').replace(/"/g,'&quot;')}"></div>
@@ -1622,12 +3011,15 @@ function card(b, base, opts){
       </div>
       <div class="f" style="margin-bottom:9px"><label>Colour</label>
         <div class="swatches">${Object.entries(CAT).map(([k,v])=>
-          `<button class="sq" data-e="${k}" aria-pressed="${k===editCat}" style="background:${v.c}" onclick="editCat='${k}';render()"></button>`).join('')}</div></div>
+          `<button class="sq" data-e="${k}" aria-pressed="${k===editCat}" style="background:${v.c}" onclick="grabDraft();editCat='${k}';render()"></button>`).join('')}</div></div>
       <div class="f" style="margin-bottom:9px"><label>Note</label><input id="eNote" value="${(b.note||'').replace(/"/g,'&quot;')}"></div>
       ${mtPickHTML(editMt, mtAuto(b), b.d, 'pickEditMt', 'eMt')}
       <div class="f" style="margin-bottom:10px"><label>What's in it — one step per line</label>
         <textarea id="eSteps" style="min-height:130px">${realSteps(b).join('\n')}</textarea></div>`;
     box.appendChild(ed);
+    if (edDraft){ const set=(id,v)=>{ const e=ed.querySelector('#'+id); if(e && v!==undefined) e.value=v; };
+      set('eN',edDraft.n); set('eT',edDraft.t); set('eD',edDraft.d);
+      set('eNote',edDraft.note); set('eSteps',edDraft.steps); set('eMt',edDraft.mt); }
     const row = el('div','acts','');
     const mk = (label, fn, primary) => { const x=el('button','',label);
       if(primary){ x.style.background='var(--text-primary)'; x.style.color='var(--surface-1)';
@@ -1642,6 +3034,17 @@ function card(b, base, opts){
   if (steps.length || b.note || b.q || b.oneoff){
     const box = el('div','steps','');
     if (b.note) box.appendChild(el('div','note', b.note));
+    if (b.topic){
+      const cur = TLOG[base] ? TOPICS.find(t=>t.id===TLOG[base].id) : nextTopic();
+      const tb = el('div','topicbox','');
+      tb.innerHTML = cur
+        ? `<div class="tl">Studying · ${cur.subj}</div><div class="tt2" dir="auto">${cur.n}</div>
+           <div class="tm2">${topicDone(cur)} of ${cur.mins} min done · the minutes you log below come off it</div>`
+        : `<div class="tl">Studying</div><div class="tt2">Nothing queued</div>
+           <div class="tm2">Add topics in the <b>Study</b> tab and they'll show up here automatically.</div>`;
+      tb.onclick = e => { e.stopPropagation(); setView('study'); };
+      box.appendChild(tb);
+    }
     if (b.q){
       const q = el('div','qbox','');
       q.innerHTML = `<label>How many <b>${b.q.label}</b> did you actually do?</label>`;
@@ -1649,7 +3052,9 @@ function card(b, base, opts){
       inp.value = amounts[base]===undefined ? '' : amounts[base];
       inp.placeholder='0';
       inp.onclick = e=>e.stopPropagation();
-      inp.oninput = e=>{ e.stopPropagation(); opts.onAmount(e.target.value); };
+      inp.oninput = e=>{ e.stopPropagation();
+        if (b.topic) logTopic(base, Math.max(0, parseInt(e.target.value)||0));
+        opts.onAmount(e.target.value); };
       const of = el('span','of', `of ${b.q.target}`);
       const sc = el('span','score',''); sc.textContent = Math.round(f*100)+'%';
       sc.style.background = scoreCol(f);
@@ -1670,7 +3075,8 @@ function card(b, base, opts){
       const acts = el('div','acts','');
       const mk = (label, fn) => { const x=el('button','',label);
         x.onclick=e=>{e.stopPropagation(); fn();}; return x; };
-      if (b.period) acts.append(mk('No class today', ()=>{ plDay=wd; plWk=0; slotOn(b.period, false); }));
+      if (b.period) acts.append(mk('No class today', ()=>{ plDay=wd; plWk=0; slotOn(b.period, false);
+        toast(`${b.n} dropped — this week only`); }));
       acts.append(mk('Edit', ()=>startEdit(opts.key, b)));
       acts.append(mk(`Skip ${wd===todayIdx()?'today':DN[wd]}`, ()=>skipToday(b, wd)));
       acts.append(mk(b.oneoff?'Delete':'Remove from every week', ()=>removeWeekly(b, wd)));
@@ -1692,14 +3098,33 @@ function card(b, base, opts){
 }
 
 function renderQuick(){
+  const w = document.getElementById('quickWrap'), ch = document.getElementById('qchev');
+  if (w) w.classList.toggle('hidden', !UI.quickOpen);
+  if (ch) ch.classList.toggle('open', !!UI.quickOpen);
   document.getElementById('qday').textContent =
     day===todayIdx() ? `today · ${DN[day]} ${dayNum(day)}` : `${DAYS[day]} ${dayNum(day)}`;
   document.getElementById('quick').innerHTML = QUICKADD
     .map((o,i)=>`<span class="chip add" style="border-left-color:${CAT[o.c].c}" onclick="quickAdd(${i})">${o.n}</span>`).join('');
 }
 
+function roomFor(wd, slot){
+  const ov = ROOMOVR[dateFor(wd) + '|' + slot];
+  if (ov) return ov;
+  return (ROOMS[wd] && ROOMS[wd][slot]) || '';
+}
 function renderDay(){
-  renderHeader(); renderNow(); renderFree(); renderStats(); renderQuick(); renderQuickDay();
+  renderHeader(); renderNow(); renderFree(); renderStats(); renderQuick();
+  const wn=document.getElementById('wknav');
+  const ws=weekStart(), we=new Date(ws); we.setDate(we.getDate()+6);
+  const f=x=>x.toLocaleDateString(undefined,{day:'numeric',month:'short'});
+  const which = wkOff===0?' · this week':wkOff===1?' · next week':wkOff===-1?' · last week':'';
+  // On a phone the dates are already on the day chips below — the arrows are the whole point.
+  wn.innerHTML = `<button onclick="gotoWeek(-1)">‹</button>
+    ${onPhone() ? (wkOff===0?'' : `<span class="wl">${which.replace(' · ','')}</span>`)
+                : `<span class="wl">${f(ws)} – ${f(we)}${which}</span>`}
+    <button onclick="gotoWeek(1)">›</button>
+    ${wkOff!==0?'<button class="wnow" onclick="gotoToday()">Today</button>':''}`;
+  renderQuickDay();
   const dc=document.getElementById('days'); dc.innerHTML='';
   DAYS.forEach((nm,i)=>{
     const p=dayProgress(i), s=dayScore(i);
@@ -1720,19 +3145,13 @@ function renderDay(){
   document.getElementById('pf').style.width=(sc*100)+'%';
   document.getElementById('pf').style.background = scoreCol(sc);
 
-  const ad=document.getElementById('allday'); ad.innerHTML='';
-  ALLDAY.forEach((raw,i)=>{
-    const b={...raw, allday:true, d:0, c:'wind', t:0}, base=`${mode}-${day}-a${i}`;
-    ad.appendChild(card(b, base, { key:'a'+i, wd:day,
-      onToggle:()=>toggleTask(day,i,true),
-      onStep:j=>toggleStep(day,base,b,j),
-      onAmount:v=>setAmount(day,base,b,v) }));
-  });
+  renderHabits();
 
   const list=document.getElementById('list'); list.innerHTML='';
   const ci=currentIdx(day), isToday=day===todayIdx(), m=nowMin();
   dayTasks(day).forEach((b,i)=>{
     const base=`${mode}-${day}-${i}`;
+    if (b.period){ const rm = roomFor(day, String(b.period)); if (rm) b = {...b, room:rm}; }
     list.appendChild(card(b, base, { key:i, wd:day, isCur:i===ci,
       isPast:isToday && i!==ci && (b.t+b.d)<=m,
       onToggle:()=>toggleTask(day,i,false),
@@ -1747,7 +3166,7 @@ function scheduledOn(s){
   const wd = new Date(s+'T12:00:00').getDay();
   // rebuild that date's week from the plan you had in force then
   const d = new Date(s+'T12:00:00'); d.setDate(d.getDate()-d.getDay());
-  const days = buildWeek(WEEK[iso(d)] || null);
+  const days = buildWeek(weekFor(iso(d)));
   return [...ALLDAY.map(b=>({...b,allday:true,d:0})), ...days[wd], ...extras.filter(e=>e.date===s)];
 }
 function taskStats(){
@@ -1847,7 +3266,7 @@ function renderWeek(){
     dayTasks(di).forEach((b,i)=>{
       const h=Math.max(b.d*PXM,13), n=el('button','blk'+(h<24?' sm':''),'');
       n.style.top=((b.t-T0)*PXM)+'px'; n.style.height=(h-2)+'px';
-      n.style.setProperty('--bc',CAT[b.c].c);
+      n.style.setProperty('--bc',(CAT[b.c]||CAT.morning).c);
       n.innerHTML=`<div class="ti">${b.n}</div><div class="tm">${fmt(b.t)}–${fmt(b.t+b.d)}</div>`;
       n.onclick=()=>{ day=di; open=i; setView('day'); };
       col.appendChild(n);
@@ -1860,17 +3279,17 @@ function renderWeek(){
     .map(v=>`<span><i class="sw2" style="background:${v.c}"></i>${v.label}</span>`).join('');
 }
 function renderTable(){
-  let h='<div class="card"><table><thead><tr><th>Day</th><th>Time</th><th>Task</th><th>Steps</th></tr></thead><tbody>';
+  let h='<div class="card"><div class="tscroll"><table><thead><tr><th>Day</th><th>Time</th><th>Task</th><th>Steps</th></tr></thead><tbody>';
   data().forEach((dayArr,i)=>{
     const flat=[]; dayArr.forEach(x=> x.steps?flat.push(...x.steps):flat.push(x));
     flat.sort((a,b)=>a.t-b.t).forEach((b,j)=>{
       const s=(b.sub||[]).filter(x=>!isHdr(x));
       h+=`<tr><td>${j===0?DAYS[i]:''}</td><td class="tw">${fmt(b.t)}–${fmt(b.t+b.d)}</td>`
-       +`<td><span class="dot" style="background:${CAT[b.c].c}"></span>${b.n}</td>`
+       +`<td><span class="dot" style="background:${(CAT[b.c]||CAT.morning).c}"></span>${b.n}</td>`
        +`<td class="sw">${s.length?s.join(' · '):'—'}</td></tr>`;
     });
   });
-  document.getElementById('tableView').innerHTML=h+'</tbody></table></div>';
+  document.getElementById('tableView').innerHTML=h+'</tbody></table></div></div>';
 }
 
 /* ---------- export ---------- */
@@ -1928,15 +3347,18 @@ function render(){
   document.getElementById('weekView').classList.toggle('hidden', view!=='week');
   document.getElementById('tableView').classList.toggle('hidden', view!=='table');
   document.getElementById('trackView').classList.toggle('hidden', view!=='track');
+  document.getElementById('studyView').classList.toggle('hidden', view!=='study');
+  document.getElementById('monthView').classList.toggle('hidden', view!=='month');
+  renderTabs();
   if(view==='day') renderDay(); else if(view==='week') renderWeek();
-  else if(view==='table') renderTable(); else renderTrack();
+  else if(view==='table') renderTable(); else if(view==='study') renderStudy();
+  else if(view==='month') renderMonth(); else renderTrack();
 }
 function setView(v){ view=v;
-  [['vDay','day'],['vWeek','week'],['vTable','table'],['vTrack','track']]
+  [['vDay','day'],['vWeek','week'],['vTable','table'],['vMonth','month'],['vStudy','study'],['vTrack','track']]
     .forEach(([id,k])=>document.getElementById(id).setAttribute('aria-pressed',v===k));
   render(); }
-function toggleTheme(){ const d=document.documentElement.getAttribute('data-theme')==='dark';
-  document.documentElement.setAttribute('data-theme',d?'light':'dark'); bTheme.textContent=d?'Dark':'Light'; }
+function toggleTheme(){ setUI('theme', UI.theme==='dark' ? 'light' : UI.theme==='light' ? 'auto' : 'dark'); }
 function pickCat(k){ fcat=k; document.querySelectorAll('.sq').forEach(s=>s.setAttribute('aria-pressed',s.dataset.c===k)); }
 function showInfo(o){
   const d=document.getElementById('detail'); d.className='card'; d.style.marginTop='12px';
@@ -1954,13 +3376,25 @@ document.getElementById('foot').textContent=
   'Sources: structureddiagnostics20260816 · training_master_plan.xlsx · Memory & Awareness Protocol. Times in Asia/Jerusalem, 24h. Your surgical team’s protocol comes first.';
 
 load();
+applyUI();
+applyWeek();     // always — even on a first run, so the built-in timetable shows
 render();
+// quiet check with school once every 6 h, if a proxy is configured
+if (SYNC.url && (!SYNC.last || Date.now() - new Date(SYNC.last).getTime() > 6*3600e3))
+  setTimeout(()=>syncSchool(true), 1200);
 let liveWk = sundayOf(0);
 setInterval(()=>{
   const w = sundayOf(0);
-  if (w !== liveWk){ liveWk = w; applyWeek(); }   // the week rolled over
+  if (w !== liveWk){ liveWk = w; applyWeek(); }        // the week rolled over
+  if (editing || !document.getElementById('form').classList.contains('hidden')) return;  // never wipe what you're typing
   render();
 },30000);
+// Some things are laid out differently on a phone, so a rotate has to redraw them.
+let wasPhone = onPhone(), rzT = null;
+window.addEventListener('resize', ()=>{
+  clearTimeout(rzT);
+  rzT = setTimeout(()=>{ if (onPhone() !== wasPhone){ wasPhone = onPhone(); render(); } }, 180);
+});
 if ('serviceWorker' in navigator && location.protocol.startsWith('http'))
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
